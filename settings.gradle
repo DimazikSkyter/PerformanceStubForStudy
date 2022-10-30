@@ -1,0 +1,6 @@
+rootProject.name = 'PerformanceStubForStudy'
+include 'TicketApi'
+include 'StubLogic'
+include 'PaymentSystem'
+include 'StubCommon'
+
