@@ -1,6 +1,7 @@
 package ru.study.stub.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import ru.study.stub.service.TicketService;
 
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/stub")
 @AllArgsConstructor
@@ -26,6 +28,7 @@ public class StubApiController {
             return ResponseEntity.status(404).body(Map.of("error",
                     String.format("Event %s not found.", ex.getEventName())));
         }  catch (Exception ex) {
+            log.error("Failed to create ticket. Catch exception", ex);
             return ResponseEntity.internalServerError().body(Map.of(
                     "error",
                     String.format("Failed to create ticket for person %s and event %s",

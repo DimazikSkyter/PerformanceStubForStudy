@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.study.stub.exception.EventNotFoundException;
 import ru.study.stub.model.Event;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,5 +23,10 @@ public class EventServiceImpl implements EventService {
         double basePrice = Optional.ofNullable(events.get(event.getEventName()))
                 .orElseThrow(() -> new EventNotFoundException(event.getEventName()));
         return basePrice * event.getEventLevel().getCoeff();
+    }
+
+    @Override
+    public Duration getTimeToPay(Event event) {
+        return Duration.of(10, ChronoUnit.MINUTES);
     }
 }

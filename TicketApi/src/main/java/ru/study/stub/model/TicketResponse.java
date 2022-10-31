@@ -1,12 +1,14 @@
 package ru.study.stub.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.Duration;
 import java.time.Instant;
 
+@Builder
 @Data
-public class Ticket {
+public class TicketResponse {
 
     private String fio;
     private int age;

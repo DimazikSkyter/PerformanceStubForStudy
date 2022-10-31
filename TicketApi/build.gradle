@@ -14,6 +14,11 @@ repositories {
 }
 
 dependencies {
+
+    compileOnly project(":StubCommon")
+
+    implementation 'org.springframework.kafka:spring-kafka:2.9.2'
+
     //spring web
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -22,9 +27,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
     testImplementation 'org.springframework.amqp:spring-rabbit-test'
 
+    //configuration processor
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
     //jupiter
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+}
+
+tasks.named('compileJava') {
+    inputs.files(tasks.named('processResources'))
 }
 
 test {

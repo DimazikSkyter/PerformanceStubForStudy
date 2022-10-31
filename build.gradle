@@ -1,6 +1,6 @@
 plugins {
-    id 'java'
-
+//    id 'java'
+    id "com.google.protobuf" version "0.9.1"
 }
 
 group 'ru.performance.stub'
@@ -10,6 +10,23 @@ repositories {
     mavenCentral()
 }
 
+allprojects  {
+
+    apply plugin: 'java'
+
+    dependencies {
+        implementation 'com.google.protobuf:protobuf-java:3.14.0'
+
+    }
+
+    protobuf {
+        // Configure the protoc executable
+        protoc {
+            // Download from repositories
+            artifact = 'com.google.protobuf:protoc:3.14.0' //:osx-x86_64
+        }
+    }
+}
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

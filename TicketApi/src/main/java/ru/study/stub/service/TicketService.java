@@ -1,9 +1,9 @@
 package ru.study.stub.service;
 
 import ru.study.stub.dto.TicketDto;
-import ru.study.stub.model.Ticket;
+import ru.study.stub.model.TicketResponse;
 
 public interface TicketService {
 
-    Ticket createNewTicket(TicketDto ticketDto);
+    TicketResponse createNewTicket(TicketDto ticketDto);
 }
