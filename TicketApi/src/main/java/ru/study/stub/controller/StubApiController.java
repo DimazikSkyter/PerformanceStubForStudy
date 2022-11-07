@@ -3,9 +3,8 @@ package ru.study.stub.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.study.stub.dto.Subscriber;
 import ru.study.stub.dto.TicketDto;
 import ru.study.stub.exception.EventNotFoundException;
 import ru.study.stub.service.TicketService;
@@ -14,20 +13,20 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/stub")
+@RequestMapping("/storage/api")
 @AllArgsConstructor
-public class StubApiController {
+public class StubApiController implements TicketApi {
 
     private TicketService ticketService;
 
-    @PutMapping("/api/ticket")
-    public ResponseEntity createNewTicket(TicketDto ticketDto) {
+    @PutMapping("/ticket")
+    public ResponseEntity createNewTicket(@RequestBody TicketDto ticketDto) {
         try {
             return ResponseEntity.ok(ticketService.createNewTicket(ticketDto));
         } catch (EventNotFoundException ex) {
             return ResponseEntity.status(404).body(Map.of("error",
                     String.format("Event %s not found.", ex.getEventName())));
-        }  catch (Exception ex) {
+        } catch (Exception ex) {
             log.error("Failed to create ticket. Catch exception", ex);
             return ResponseEntity.internalServerError().body(Map.of(
                     "error",
@@ -36,4 +35,29 @@ public class StubApiController {
                             ticketDto.getEvent())));
         }
     }
+
+    @GetMapping("/ticket/status/{uid}")
+    public ResponseEntity checkTicketStatus(@PathVariable("uid") String uid) {
+        try {
+            return ResponseEntity.ok(ticketService.createNewTicket(null));
+        } catch (NullPointerException ex) {
+            return ResponseEntity.status(404).body(
+                    Map.of("error", "Ticket " + uid + " not found."));
+        } catch (Exception ex) {
+            log.error("Failed to create ticket. Catch exception", ex);
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "Sorry, failed to get status of ticket " + uid));
+        }
+    }
+
+    @PutMapping("/subscribe")
+    public ResponseEntity subscribeToPush(@RequestBody Subscriber subscriber) {
+        return null;
+    }
+
+    @DeleteMapping("/subscribe")
+    public ResponseEntity unSubscribeToPush(@RequestBody Subscriber subscriber) {
+        return null;
+    }
+
 }

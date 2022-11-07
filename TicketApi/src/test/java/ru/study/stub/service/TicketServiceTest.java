@@ -44,4 +44,9 @@ class TicketServiceTest {
         log.info("finish");
     }
 
+    @Test
+    void tests() {
+        System.out.println(32<<3);
+    }
+
 }

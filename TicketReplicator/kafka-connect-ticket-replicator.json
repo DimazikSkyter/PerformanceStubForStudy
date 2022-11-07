@@ -1,0 +1,28 @@
+{
+  "name" : "ticket-replicator",
+  "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
+  "kafka.auth.mode": "",
+  "kafka.api.key": "<your-kafka-api-key>",
+  "kafka.api.secret" : "<your-kafka-api-secret>",
+  "topic" : "ticket_body",
+  "tasks.max" : "${env:CONNECT_TASKS_MAX}",
+  "batch:size" : "${env:CONNECT_BATCH_SIZE}",
+  "insert.mode" : "upsert",
+  "pk.mode" : "record_value",
+  "pk.field" : "id",
+  "connection.url" : "${env:DB_URL}&rewriteBatchedStatements=true&useLocalSessionState=true",
+  "connection.user" : "${env:DB_USERNAME}",
+  "connection.password": "${env:DB_PASSWORD}",
+
+  "value.converter" : "com.blueapron.connect.protobuf.ProtobufConverter",
+  "value.converter.protoClassName" : "ru.study.stub.proto.Ticket",
+  "key.converter" : "",
+
+  "ssl.mode": "prefer",
+  "db.name": "mysql-test",
+  "table.whitelist": "customers",
+  "table.name.format" : "tickets",
+  "timestamp.column.name": "created_at",
+  "output.data.format": "JSON",
+  "db.timezone": "UCT"
+}

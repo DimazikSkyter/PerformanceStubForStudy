@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import ru.study.stub.dto.TicketDto;
+import ru.study.stub.entity.TicketStatus;
 import ru.study.stub.model.TicketResponse;
 import ru.study.stub.producer.QueueProducer;
 import ru.study.stub.proto.Ticket;
@@ -24,7 +26,6 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketResponse createNewTicket(TicketDto ticketDto) {
-        //todo переделать на заполнение
         double eventAndGetItPrice = eventService.findEventAndGetItPrice(ticketDto.getEvent());
 
         Instant start = Instant.now();
@@ -45,10 +46,39 @@ public class TicketServiceImpl implements TicketService {
                 .build();
     }
 
+    @Override
+    public TicketStatus checkTicket(String uid) {
+        return null;
+    }
+
     private boolean save(Ticket ticket) {
-        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
         var future = queueProducer
                 .send(ticket);
+
+        AtomicBoolean atomicBoolean = addListener(ticket, future);
+
+        await(ticket);
+
+        if (atomicBoolean.get()) {
+            throw new RuntimeException("Catch exception while save a ticket.");
+        }
+
+        return true;
+    }
+
+    private void await(Ticket ticket) {
+        synchronized (ticket) {
+            try {
+                //todo add timeout notifier
+                ticket.wait();
+            } catch (InterruptedException e) {
+                log.error("Catch error while wait");
+            }
+        }
+    }
+
+    private AtomicBoolean addListener(Ticket ticket, ListenableFuture future) {
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
         future.addCallback(new ListenableFutureCallback<SendResult<String, Ticket>>() {
             @Override
             public void onSuccess(SendResult<String, Ticket> result) {
@@ -67,20 +97,7 @@ public class TicketServiceImpl implements TicketService {
                 }
             }
         });
-
-        synchronized (ticket) {
-            try {
-                ticket.wait();
-            } catch (InterruptedException e) {
-                log.error("Catch error while wait");
-            }
-        }
-
-        if (atomicBoolean.get()) {
-            throw new RuntimeException("Catch exception while save a ticket.");
-        }
-
-        return true;
+        return atomicBoolean;
     }
 
     private Ticket transform(TicketDto ticketDto, double price, Instant start) {
