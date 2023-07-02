@@ -4,4 +4,5 @@ include 'TicketHandler'
 include 'PaymentSystem'
 include 'StubCommon'
 include 'TicketReplicator'
+include 'Theatre'
 
