@@ -1,5 +1,6 @@
 package ru.nspk.performance.theatre.service;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nspk.performance.theatre.exception.EventNotFound;
@@ -15,11 +16,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventServiceDefault implements EventService {
 
+    @Getter
     private final Map<String, Event> events;
-    private long reserveSequence = 0;
 
     @Override
-    public Set<String> events() {
+    public Set<String> eventNames() {
         return events.keySet();
     }
 
@@ -34,36 +35,4 @@ public class EventServiceDefault implements EventService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
     }
-
-    @Override
-    public ReserveResponse reserve(String eventName, List<String> seats) {
-        Event event = Optional.ofNullable(events.get(eventName)).orElseThrow(() -> new EventNotFound(eventName));
-
-        Set<Map.Entry<String, SeatStatus>> nonFreeSeats = Set.of();
-        synchronized (event) {
-             nonFreeSeats = seats.stream()
-                    .map(seat -> Map.entry(seat, event.getSeats().get(seat)))
-                    .filter(entry -> !entry.getValue().equals(SeatStatus.FREE))
-                    .collect(Collectors.toSet());
-            if (nonFreeSeats.isEmpty()) {
-                seats.forEach(seat -> event.getSeats().put(seat, SeatStatus.RESERVED));
-                return ReserveResponse.builder()
-                        .reserveId(reserveSequence++)
-                        .nonFreeSeats(Set.of())
-                        .reserveStarted(Instant.now())
-                        .build();
-            }
-        }
-        return ReserveResponse.builder()
-                .reserveId(-1)
-                .nonFreeSeats(nonFreeSeats.stream().map(Map.Entry::getKey).collect(Collectors.toSet()))
-                .build();
-    }
-
-    @Override
-    public void release(long reserveId) {
-
-    }
-
-    //todo автоматическое снятие резерва через 5 минут
 }

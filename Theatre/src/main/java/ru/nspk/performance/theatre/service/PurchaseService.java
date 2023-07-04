@@ -1,4 +1,8 @@
 package ru.nspk.performance.theatre.service;
 
-public class PurchaseService {
+import ru.nspk.performance.theatre.model.PurchaseResponse;
+
+public interface PurchaseService {
+
+    PurchaseResponse purchase(long reserveId);
 }

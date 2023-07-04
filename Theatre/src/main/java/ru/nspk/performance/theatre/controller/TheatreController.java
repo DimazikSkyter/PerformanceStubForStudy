@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.nspk.performance.theatre.model.PurchaseResponse;
 import ru.nspk.performance.theatre.model.ReserveResponse;
 import ru.nspk.performance.theatre.service.EventService;
+import ru.nspk.performance.theatre.service.PurchaseService;
+import ru.nspk.performance.theatre.service.ReserveService;
 
 import java.util.List;
 import java.util.Set;
@@ -16,10 +18,12 @@ import java.util.Set;
 public class TheatreController {
 
     private final EventService eventService;
+    private final ReserveService reserveService;
+    private final PurchaseService purchaseService;
 
     @GetMapping("/events")
     public Set<String> events() {
-        return eventService.events();
+        return eventService.eventNames();
     }
 
     @GetMapping("/seats/{event}")
@@ -29,16 +33,16 @@ public class TheatreController {
 
     @PostMapping("/reserve")
     public ReserveResponse reserve(@RequestParam String event, @RequestParam List<String> seats) {
-        return eventService.reserve(event, seats);
+        return reserveService.reserve(event, seats);
     }
 
     @PostMapping("/release")
     public void release(@RequestParam long reserveId) {
-        eventService.release(reserveId);
+        reserveService.release(reserveId);
     }
 
     @PostMapping("/purchase")
-    public PurchaseResponse purchase() {
-        return null;
+    public PurchaseResponse purchase(@RequestParam long reserveId) {
+        return purchaseService.purchase(reserveId);
     }
 }
