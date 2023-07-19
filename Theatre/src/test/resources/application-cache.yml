@@ -1,1 +1,2 @@
-cache.timeout: PT15S
+cache:
+  timeout: PT4S

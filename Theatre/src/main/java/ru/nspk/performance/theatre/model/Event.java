@@ -11,8 +11,8 @@ import java.util.Optional;
 @Data
 public class Event {
 
-    private String name;
-    private Map<String, SeatStatus> seats;
+    private final String name;
+    private final Map<String, SeatStatus> seats;
 
     private Object syncReleaseAndPurchase = new Object();
 

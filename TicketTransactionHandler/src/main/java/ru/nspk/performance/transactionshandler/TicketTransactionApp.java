@@ -1,12 +1,13 @@
-package ru.nspk.performance.theatre;
+package ru.nspk.performance.transactionshandler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 @SpringBootApplication
-public class TheatreApp {
+@Slf4j
+public class TicketTransactionApp {
 
     public static void main(String[] args) {
-        SpringApplication.run(TheatreApp.class, args);
+        SpringApplication.run(TicketTransactionApp.class, args);
     }
 }

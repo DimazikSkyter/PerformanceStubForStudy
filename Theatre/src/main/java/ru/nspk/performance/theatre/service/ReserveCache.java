@@ -7,12 +7,12 @@ import ru.nspk.performance.theatre.model.Reserve;
 
 public interface ReserveCache {
 
-    @Cacheable(value = "reserve", unless = "#result==null")
+    @Cacheable(value = "reserves", unless = "#result==null")
     Reserve getReserve(long reserveId);
 
-    @CachePut(value = "reserve", key = "reserveId")
-    void putReserve(long reserveId, Reserve reserve);
+    @CachePut(value = "reserves", key = "#reserveId")
+    Reserve putReserve(long reserveId, Reserve reserve);
 
-    @CacheEvict(value = "reserve", key = "reserveId")
+    @CacheEvict(value = "reserves")
     void evictReserve(long reserveId);
 }
