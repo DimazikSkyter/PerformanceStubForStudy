@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+package ru.nspk.performance.model;
+
+
+option java_multiple_files = true;
+option java_package = "ru.nspk.performance.model";
+option java_outer_classname = "NewTransactionEventDto";
+
+message NewTransactionEvent {
+  int32 serviceId = 1;
+  int64 eventId = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  int64 ticketsId = 4;
+}

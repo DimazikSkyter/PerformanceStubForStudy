@@ -17,4 +17,5 @@ import org.springframework.stereotype.Component;
 public class KafkaProperties {
 
     private String bootstrapAddress;
+    private String eventTopic;
 }

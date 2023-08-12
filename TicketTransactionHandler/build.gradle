@@ -10,11 +10,17 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url "https://packages.confluent.io/maven/" }
 }
 
 dependencies {
 
+    compileOnly project(":StubCommon")
+    testCompileOnly project(":StubCommon")
+
+    implementation 'io.confluent:kafka-protobuf-serializer:7.4.0'
     implementation 'org.apache.kafka:kafka-streams-test-utils'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
 
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
 
@@ -26,8 +32,27 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.apache.kafka:kafka-streams'
 
+    testImplementation "org.testcontainers:kafka:1.18.3"
+    testImplementation 'org.testcontainers:junit-jupiter:1.18.3'
+
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+//Это нужно, чтобы пробросить протобаф файлы
+configurations {
+    runtimeClasspath {
+        extendsFrom compileOnly
+    }
+    testRuntimeClasspath {
+        extendsFrom compileOnly
+    }
+}
+
+
+afterEvaluate {
+    generateEffectiveLombokConfig.mustRunAfter project(':StubCommon').generateProto
 }
 
 test {

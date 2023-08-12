@@ -7,7 +7,6 @@ plugins {
 
 group 'ru.performance.stub'
 version '1.0-SNAPSHOT'
-targetCompatibility = '11'
 
 repositories {
     mavenCentral()
@@ -17,7 +16,7 @@ dependencies {
 
     compileOnly project(":StubCommon")
 
-    implementation 'org.springframework.kafka:spring-kafka:2.9.2'
+    implementation 'org.springframework.kafka:spring-kafka'
 
     //spring web
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -34,10 +33,6 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
-}
-
-tasks.named('compileJava') {
-    inputs.files(tasks.named('processResources'))
 }
 
 test {

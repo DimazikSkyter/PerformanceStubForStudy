@@ -1,0 +1,18 @@
+syntax = "proto3";
+package ru.nspk.performance.model;
+
+import "google/protobuf/timestamp.proto";
+import "ru/nspk/performance/base/place_coordinate.proto";
+
+
+option java_multiple_files = true;
+option java_package = "ru.nspk.performance.model";
+option java_outer_classname = "ReserveDto";
+
+message Reserve {
+  int32 reserveId = 1;
+  int32 serviceId = 2;
+  int64 eventId = 3;
+  string eventDate = 4;
+  repeated ru.nspk.performance.base.PlaceCoordinate placeCoordinate = 5;
+}

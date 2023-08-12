@@ -29,8 +29,9 @@ public class TicketEventProcessor {
 
         KTable<String, Long> wordCounts = messageStream
                 .mapValues((ValueMapper<String, String>) String::toLowerCase)
-                .process()
-                .flatMapValues(value -> Arrays.asList(value.split("\\W+")))
+                
+//                .process()
+//                .flatMapValues(value -> Arrays.asList(value.split("\\W+")))
                 .groupBy((key, word) -> word, Grouped.with(STRING_SERDE, STRING_SERDE))
                 .count();
 
