@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public abstract class Event {
-    private long eventId;
+public class CreateReserveEvent extends Event {
+
+    private final List<String> seats;
 }

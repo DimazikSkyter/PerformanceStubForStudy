@@ -16,6 +16,7 @@ repositories {
 dependencies {
 
     compileOnly project(":StubCommon")
+    compileOnly project(":Theatre")
     testCompileOnly project(":StubCommon")
 
     implementation 'io.confluent:kafka-protobuf-serializer:7.4.0'

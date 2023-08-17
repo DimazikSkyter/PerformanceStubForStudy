@@ -4,5 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface KeyValueStorage <K, V> {
 
-    CompletableFuture<K> put(K key, V value);
+    CompletableFuture<V> put(String map, K key, V value);
+
+    CompletableFuture<V> get(String map, K key);
 }

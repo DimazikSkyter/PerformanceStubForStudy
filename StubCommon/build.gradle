@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id "io.freefair.lombok" version "6.5.1"
-    id "com.google.protobuf" version "0.9.1"
+    id "com.google.protobuf" //version "0.9.1"
 }
 
 group 'ru.performance.stub'
@@ -40,6 +40,6 @@ protobuf {
     // Configure the protoc executable
     protoc {
         // Download from repositories
-        artifact = 'com.google.protobuf:protoc:3.14.0' //:osx-x86_64
+        artifact = 'com.google.protobuf:protoc:3.14.0:osx-x86_64' //:
     }
 }

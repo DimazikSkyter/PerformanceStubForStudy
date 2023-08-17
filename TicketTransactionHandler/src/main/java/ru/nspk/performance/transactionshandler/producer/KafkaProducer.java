@@ -7,12 +7,12 @@ import org.springframework.util.concurrent.ListenableFuture;
 import ru.nspk.performance.transactionshandler.properties.KafkaProperties;
 
 @RequiredArgsConstructor
-public abstract class KafkaProducer<V> {
+public class KafkaProducer {
 
-    private final KafkaTemplate<String, V> template;
+    private final KafkaTemplate<String, byte[]> template;
     private KafkaProperties kafkaProperties;
 
-    public ListenableFuture<SendResult<String, V>> sendEvent(String key, V value) {
+    public ListenableFuture<SendResult<String, byte[]>> sendEvent(String key, byte[] value) {
         return template.send(kafkaProperties.getEventTopic(), key, value);
     }
 }

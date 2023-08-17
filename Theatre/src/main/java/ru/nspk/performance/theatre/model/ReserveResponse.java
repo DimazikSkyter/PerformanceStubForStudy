@@ -15,6 +15,7 @@ import java.util.Set;
 public class ReserveResponse {
 
     private long reserveId;
+    private long requestId;
     private Instant reserveStarted;
     private Set<String> nonFreeSeats;
     @Builder.Default

@@ -5,16 +5,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nspk.performance.api.TicketRequest;
-import ru.nspk.performance.transactionshandler.model.PaymentCheckResponse;
-import ru.nspk.performance.transactionshandler.model.PaymentSystem;
-import ru.nspk.performance.transactionshandler.model.ReserveResponse;
+import ru.nspk.performance.theatre.model.ReserveResponse;
+import ru.nspk.performance.transactionshandler.model.*;
 import ru.nspk.performance.transactionshandler.keyvaluestorage.KeyValueStorage;
-import ru.nspk.performance.transactionshandler.model.ReversePaymentResponse;
 import ru.nspk.performance.transactionshandler.producer.KafkaProducer;
 import ru.nspk.performance.transactionshandler.state.TicketTransaction;
+import ru.nspk.performance.transactionshandler.theatreclient.TheatreClient;
+import ru.nspk.performance.transactionshandler.transformer.EventTransformer;
 import ru.nspk.performance.transactionshandler.transformer.TicketRequestTransformer;
 import ru.nspk.performance.transactionshandler.validator.ValidationException;
 import ru.nspk.performance.transactionshandler.validator.Validator;
+
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @Service
@@ -23,17 +26,19 @@ public class TransactionalEventService {
 
     private final KafkaProducer kafkaProducer;
     private final Validator validator;
+    private final TheatreClient theatreClient;
+    private final EventTransformer eventTransformer;
     private final TicketRequestTransformer transformer;
-    private final KeyValueStorage<Integer, TicketTransaction> keyValueStorage;
+    private final KeyValueStorage<String, Object> keyValueStorage;
 
     @Transactional
     public void newTicketEvent(TicketRequest ticketRequest) {
         try {
             validator.validate(ticketRequest);
             TicketTransaction ticketTransaction = transformer.transform(ticketRequest);
-            kafkaProducer.sendEvent(String.valueOf(ticketRequest.getEventId()), ticketTransaction);
+            kafkaProducer.sendEvent(String.valueOf(ticketRequest.getEventId()), ticketTransaction.getBytes());
             keyValueStorage.put(ticketRequest.getEventId(), ticketTransaction);
-//            makeReserveEvent(eventDto);
+            CompletableFuture.runAsync(() -> makeReserve(ticketTransaction));
         } catch (ValidationException validationException) {
             //отправка акноледжа
 //            rejectTransaction(validationException.getMessage());
@@ -45,7 +50,24 @@ public class TransactionalEventService {
         // Сохраняем state в ожидание ответа
     }
 
+    public void makeReserve(long transactionId, CreateReserveEvent createReserveEvent) {
+        String requestId = UUID.randomUUID().toString();
+        keyValueStorage.put("requests", requestId, transactionId);
+        theatreClient.reserve(
+                requestId,
+                createReserveEvent.getEventId(),
+                createReserveEvent.getSeats(),
+                this::handleReserveResponse);
+
+    }
+
     public void handleReserveResponse(ReserveResponse reserveResponse) {
+
+        ReserveResponseEvent reserveResponseEvent = eventTransformer.transform(reserveResponse);
+        long transactionId = keyValueStorage.get("requests", reserveResponse.getRequestId());
+        //достаем из имдг стейт, проверяем, что находится в правильном статусе
+        //меняем состояние далее
+
         // если негативный рапартуем в кафку
         // переводим в состояние Reject
 
