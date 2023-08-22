@@ -1,10 +1,13 @@
 package ru.nspk.performance.transactionshandler.keyvaluestorage;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
-public interface KeyValueStorage <K, V> {
+public interface KeyValueStorage<K, V> {
 
-    CompletableFuture<V> put(String map, K key, V value);
+    void put(String map, K key, V value) throws JsonProcessingException;
 
-    CompletableFuture<V> get(String map, K key);
+    V get(String map, K key);
 }
