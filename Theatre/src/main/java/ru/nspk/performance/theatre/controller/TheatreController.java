@@ -32,12 +32,12 @@ public class TheatreController {
     }
 
     @PostMapping("/reserve")
-    public ReserveResponse reserve(@RequestParam String event, @RequestParam List<String> seats) {
+    public ReserveResponse reserve(@RequestParam(name = "event") String event, @RequestParam(name = "seat") List<String> seats) {
         return reserveService.reserve(event, seats);
     }
 
     @PostMapping("/release")
-    public void release(@RequestParam long reserveId) {
+    public void release(@RequestParam(name = "reserve_id") long reserveId) {
         reserveService.release(reserveId);
     }
 

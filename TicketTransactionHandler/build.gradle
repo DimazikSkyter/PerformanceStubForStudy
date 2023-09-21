@@ -23,7 +23,7 @@ dependencies {
     implementation 'org.apache.kafka:kafka-streams-test-utils'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
 
-    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure:3.0.10'
 
     implementation 'com.hazelcast.jet.contrib:hazelcast-jet-spring-boot-starter:2.0.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -34,6 +34,15 @@ dependencies {
 
     testImplementation "org.testcontainers:kafka:1.18.3"
     testImplementation 'org.testcontainers:junit-jupiter:1.18.3'
+
+    // http client
+    implementation 'org.springframework:spring-webflux:6.0.8'
+    implementation('org.springframework:spring-web:6.0.8') // force change version
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
+    implementation 'org.eclipse.jetty:jetty-reactive-httpclient:3.0.8'
+    implementation 'org.reactivestreams:reactive-streams:1.0.4'
+    implementation 'io.projectreactor:reactor-core:3.4.32'
+    implementation 'org.eclipse.jetty:jetty-server:11.0.16'
 
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

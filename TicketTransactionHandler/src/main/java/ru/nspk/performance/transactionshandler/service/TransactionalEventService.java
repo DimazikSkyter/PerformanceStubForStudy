@@ -27,6 +27,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @RequiredArgsConstructor
 @Service
@@ -227,14 +229,26 @@ public class TransactionalEventService {
             keyValueStorage.put("requests",
                     requestId,
                     transactionId,
-                    bytes -> theatreClient.reserve(
-                            requestId,
-                            createReserveEvent.getEventId(),
-                            createReserveEvent.getSeats(),
-                            this::handleReserveResponse));
+                    bytes -> makeReserveToTheatre(requestId, transactionId, createReserveEvent));
         } catch (Exception e) {
             log.error("Catch exception while try to save requestId {} for transaction {}\n",
                     requestId, transactionId, e);
+        }
+    }
+
+    private void makeReserveToTheatre(String requestId, long transactionId, CreateReserveEvent createReserveEvent) {
+        try {
+            theatreClient.reserve(
+                    requestId,
+                    createReserveEvent.getEventId(),
+                    createReserveEvent.getSeats(),
+                    this::handleReserveResponse);
+        } catch (TimeoutException e) {
+            log.error("Failed to get reserve response for transaction {} during wait time", transactionId);
+            //todo реджекта нет, потому что клиент потом вынесется в отдельный модуль и в этом отпадет смысл
+        } catch (Exception e) {
+            log.error("Failed to generate reserve to transaction {}", transactionId, e);
+            rejectTransaction(transactionId, "reserve in theatre exception");
         }
     }
 
