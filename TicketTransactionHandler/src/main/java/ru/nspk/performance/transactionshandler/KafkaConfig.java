@@ -20,7 +20,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaProducer kafkaProducer(KafkaTemplate<String, byte[]> kafkaTemplate) {
+    public KafkaProducer kafkaProducer(KafkaTemplate<Long, byte[]> kafkaTemplate) {
         return new KafkaProducer(kafkaTemplate);
     }
 }

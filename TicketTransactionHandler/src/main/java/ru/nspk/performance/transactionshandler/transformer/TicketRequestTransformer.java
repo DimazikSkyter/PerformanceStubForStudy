@@ -1,9 +1,13 @@
 package ru.nspk.performance.transactionshandler.transformer;
 
+import lombok.NonNull;
 import ru.nspk.performance.api.TicketRequest;
-import ru.nspk.performance.transactionshandler.state.TicketTransaction;
+import ru.nspk.performance.transactionshandler.state.TransactionState;
 
-public interface TicketRequestTransformer {
+public class TicketRequestTransformer implements Transformer<TicketRequest, TransactionState> {
 
-    TicketTransaction transform(TicketRequest ticketRequest);
+    @Override
+    public @NonNull TransactionState transform(TicketRequest in) {
+        return null;
+    }
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
 
@@ -19,5 +20,5 @@ public class ReserveResponse {
     private Instant reserveStarted;
     private Set<String> nonFreeSeats;
     @Builder.Default
-    private String reserveDuration = "5m";
+    private String reserveDuration = "PT5M";
 }

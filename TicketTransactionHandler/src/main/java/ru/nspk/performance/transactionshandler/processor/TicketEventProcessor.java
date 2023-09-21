@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Slf4j
+@Deprecated
 public class TicketEventProcessor {
 
     private static final Serde<String> STRING_SERDE = Serdes.String();
