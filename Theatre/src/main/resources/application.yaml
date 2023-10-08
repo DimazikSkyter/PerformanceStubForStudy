@@ -1,0 +1,17 @@
+events:
+  path: e:\tmp\Events.json
+
+cache:
+  timeout: PT30S
+management:
+  server:
+    port: 8081
+  endpoint:
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"

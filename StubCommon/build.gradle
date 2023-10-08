@@ -4,7 +4,7 @@ plugins {
     id "com.google.protobuf" //version "0.9.1"
 }
 
-group 'ru.performance.stub'
+group 'stub'
 version '1.0-SNAPSHOT'
 
 repositories {

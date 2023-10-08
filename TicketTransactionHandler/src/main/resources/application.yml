@@ -1,0 +1,9 @@
+payment-service:
+  instance-key: 1
+  payment-service-base-address: "http://localhost:9401"
+  payment-service-path: /processing/payment/paymentLink
+in-memory:
+  address: "localhost:5701"
+management:
+  server:
+    port: 9080

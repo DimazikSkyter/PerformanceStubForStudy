@@ -4,7 +4,7 @@ package ru.nspk.performance.transactionshandler.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.security.oauthbearer.secured.Retryable;
+import org.apache.kafka.common.security.oauthbearer.internals.secured.Retryable;
 import org.springframework.kafka.annotation.KafkaListener;
 import ru.nspk.performance.api.TicketRequest;
 import ru.nspk.performance.transactionshandler.service.TransactionalEventService;

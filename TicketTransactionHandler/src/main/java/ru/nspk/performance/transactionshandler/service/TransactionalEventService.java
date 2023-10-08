@@ -20,14 +20,14 @@ import ru.nspk.performance.transactionshandler.transformer.ReserveResponseTransf
 import ru.nspk.performance.transactionshandler.transformer.TransformException;
 import ru.nspk.performance.transactionshandler.transformer.TransformerMultiton;
 import ru.nspk.performance.transactionshandler.validator.ValidationException;
-import ru.nspk.performance.transactionshandler.validator.Validator;
+import ru.nspk.performance.transactionshandler.validator.ValidatorMultiton;
 
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 @RequiredArgsConstructor
@@ -38,10 +38,10 @@ public class TransactionalEventService {
     public static final String TRANSACTION_MAP = "transactions";
     public static final String REQUESTS_MAP = "requests";
 
+
     private final KafkaProducer kafkaProducer;
-    private final Validator validator;
+    private final ValidatorMultiton validators;
     private final TheatreClient theatreClient;
-    private final ReserveResponseTransformer eventTransformer;
     private final TransformerMultiton transformers;
     private final KeyValueStorage keyValueStorage;
     private final TimeoutProcessor timeoutProcessor;
@@ -52,7 +52,7 @@ public class TransactionalEventService {
     public void newTicketEvent(TicketRequest ticketRequest) {
         try {
             Instant start = Instant.now();
-            validator.validate(ticketRequest);
+            validators.validate(ticketRequest);
             TicketTransactionState ticketTransactionState = transformers.transform(ticketRequest);
 
             timeoutProcessor.executeWithTimeout(
@@ -82,7 +82,7 @@ public class TransactionalEventService {
 
     public void handleReserveResponse(ReserveResponse reserveResponse) {
         try {
-            ReserveResponseEvent reserveResponseEvent = eventTransformer.transform(reserveResponse);
+            ReserveResponseEvent reserveResponseEvent = transformers.transform(reserveResponse);
             Long transactionId = (Long) keyValueStorage.get(REQUESTS_MAP, reserveResponse.getRequestId());
             if (transactionId == null) {
                 log.error("Request of reserve not found {} ", reserveResponse.getRequestId());
@@ -93,7 +93,7 @@ public class TransactionalEventService {
                 rejectTransaction(transactionId, "Validation exception");
             }
 
-            validator.validate(reserveResponseEvent);
+            validators.validate(reserveResponseEvent);
 
             createPaymentWithTimeout(reserveResponseEvent, transactionId);
         } catch (Exception e) {
@@ -127,12 +127,16 @@ public class TransactionalEventService {
         try {
             PaymentRequest paymentRequest = transformers.transform(reserveResponseEvent);
             paymentService.createPaymentLink(paymentRequest)
-                    .thenAccept(httpResponse -> {
+                    .orTimeout(transactionProperties.getPaymentLinkTimeoutMs(), TimeUnit.MILLISECONDS)
+                    .thenAccept(paymentLinkBytes -> {
                         try {
-                            byte[] paymentLinkBytes = httpResponse.body();
                             kafkaProducer.sendPaymentLink(paymentLinkBytes)
-                                    .addCallback(result -> changeStatusToWaitingForPayment(paymentRequest),
-                                            result -> rejectTransaction(transactionId, "Failed to store payment link"));
+                                    .exceptionally(throwable -> {
+                                        log.error("");
+                                        rejectTransaction(transactionId, "Failed to store payment link");
+                                        return null;
+                                    })
+                                    .thenAccept(result -> changeStatusToWaitingForPayment(paymentRequest));
                         } catch (Exception e) {
                             log.error("Failed to create payment link for transactionId {}", transactionId, e);
                             rejectTransaction(transactionId, "Something wrong with income payment link response");
@@ -162,7 +166,7 @@ public class TransactionalEventService {
                 log.error("Request of payment not found {}.", paymentCheckResponse.getRequestId());
                 return;
             }
-            validator.validate(paymentCheckResponse);
+            validators.validate(paymentCheckResponse);
 
             if (paymentCheckResponse.isPaymentStatusSuccess()) {
                 PaymentEvent paymentEvent = new PaymentEvent();
@@ -226,7 +230,7 @@ public class TransactionalEventService {
     public void makeReserve(long transactionId, CreateReserveEvent createReserveEvent) {
         String requestId = UUID.randomUUID().toString();
         try {
-            keyValueStorage.put("requests",
+            keyValueStorage.put(REQUESTS_MAP,
                     requestId,
                     transactionId,
                     bytes -> makeReserveToTheatre(requestId, transactionId, createReserveEvent));

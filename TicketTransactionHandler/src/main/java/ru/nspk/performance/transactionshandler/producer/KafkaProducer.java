@@ -9,6 +9,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import ru.nspk.performance.transactionshandler.properties.KafkaProperties;
 import ru.nspk.performance.transactionshandler.state.TicketTransactionState;
 
+import java.util.concurrent.CompletableFuture;
+
 @RequiredArgsConstructor
 public class KafkaProducer {
 
@@ -16,15 +18,15 @@ public class KafkaProducer {
     private final KafkaTemplate<Long, byte[]> template;
     private KafkaProperties kafkaProperties;
 
-    public ListenableFuture<SendResult<Long, byte[]>> sendEvent(Long key, byte[] value) {
+    public CompletableFuture<SendResult<Long, byte[]>> sendEvent(Long key, byte[] value) {
         return template.send(kafkaProperties.getEventTopic(), key, value);
     }
 
-    public ListenableFuture<SendResult<Long, byte[]>> sendTransactionState(TicketTransactionState ticketTransactionState) {
+    public CompletableFuture<SendResult<Long, byte[]>> sendTransactionState(TicketTransactionState ticketTransactionState) {
         return template.send(kafkaProperties.getTransactionStateTopic(), ticketTransactionState.getBytes());
     }
 
-    public ListenableFuture<SendResult<Long, byte[]>> sendPaymentLink(byte[] paymentLinkBytes) {
+    public CompletableFuture<SendResult<Long, byte[]>> sendPaymentLink(byte[] paymentLinkBytes) {
         return template.send(kafkaProperties.getEventTopic(), paymentLinkBytes);
     }
 }

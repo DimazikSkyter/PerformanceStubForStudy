@@ -1,21 +1,7 @@
 package ru.nspk.performance.transactionshandler.producer;
 
-import io.confluent.kafka.schemaregistry.SchemaProvider;
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider;
-import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer;
-import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
@@ -24,17 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -44,10 +26,8 @@ import ru.nspk.performance.transactionshandler.properties.KafkaProperties;
 import ru.nspk.performance.transactionshandler.schemaregistry.SchemaRegistryContainer;
 import ru.nspk.performance.transactionshandler.service.TransactionalEventService;
 
-import java.time.Duration;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @ActiveProfiles(profiles = {"kafka"})
@@ -59,13 +39,16 @@ class KafkaProducerTest {
     public static final String CONFLUENT_PLATFORM_VERSION = "6.2.1";
 
 
-    private static final SchemaRegistryContainer SCHEMA_REGISTRY =
-            new SchemaRegistryContainer(CONFLUENT_PLATFORM_VERSION);
+    private static final SchemaRegistryContainer SCHEMA_REGISTRY = new SchemaRegistryContainer(CONFLUENT_PLATFORM_VERSION);
 
     @Container
-    static KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:" + CONFLUENT_PLATFORM_VERSION))
-            .withEnv("KAFKA_CREATE_TOPICS", "test_topic")
-            .withExposedPorts(2181, 9092, 9093);
+    static KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:" + CONFLUENT_PLATFORM_VERSION)).withEnv("KAFKA_CREATE_TOPICS", "test_topic").withExposedPorts(2181, 9092, 9093);
+    @MockBean
+    TransactionalEventService transactionalEventService;
+    @Autowired
+    KafkaTemplate<String, NewTransactionEvent> kafkaTemplate;
+    @Autowired
+    KafkaConsumer<String, ?> newTransactionEventKafkaConsumer;
 
     @DynamicPropertySource
     static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -74,22 +57,11 @@ class KafkaProducerTest {
         registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
     }
 
-    @MockBean
-    TransactionalEventService transactionalEventService;
-
-    @Autowired
-    KafkaTemplate<String, NewTransactionEvent> kafkaTemplate;
-
-    @Autowired
-    KafkaConsumer<String, ?> newTransactionEventKafkaConsumer;
-
     @Test
     void sendEvent() throws ExecutionException, InterruptedException {
 
         newTransactionEventKafkaConsumer.assign(Collections.singleton(new TopicPartition("test_topic", 0)));
-        ListenableFuture<SendResult<String, NewTransactionEvent>> test_topic = kafkaTemplate.send("test_topic", NewTransactionEvent.newBuilder()
-                .setEventId(33)
-                .build());
+        CompletableFuture<SendResult<String, NewTransactionEvent>> test_topic = kafkaTemplate.send("test_topic", NewTransactionEvent.newBuilder().setEventId(33).build());
         test_topic.get();
 //        while (true) {
 //            ConsumerRecords<String, NewTransactionEvent> records = newTransactionEventKafkaConsumer.poll(Duration.ofMillis(100));

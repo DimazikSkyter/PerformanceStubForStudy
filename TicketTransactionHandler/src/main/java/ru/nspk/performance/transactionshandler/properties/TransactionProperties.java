@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 @Data
 public class TransactionProperties {
 
+    private long paymentLinkTimeoutMs;
     private long fullTimeoutDurationMs;
     private long maxPaymentTimeMs;
+    private int timeoutProcessorThreads;
 }

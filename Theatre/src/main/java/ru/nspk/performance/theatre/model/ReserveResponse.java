@@ -21,4 +21,5 @@ public class ReserveResponse {
     private Set<String> nonFreeSeats;
     @Builder.Default
     private String reserveDuration = "PT5M";
+    private String errorMessage;
 }

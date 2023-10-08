@@ -1,6 +1,10 @@
 package ru.nspk.performance.theatre.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import ru.nspk.performance.theatre.exception.SeatsAlreadySoldException;
 
 import java.util.ArrayList;
@@ -9,16 +13,17 @@ import java.util.Map;
 import java.util.Optional;
 
 @Data
+@RequiredArgsConstructor(onConstructor = @__(@JsonCreator))
 public class Event {
 
+    @JsonProperty("name")
     private final String name;
+    @JsonProperty("seats")
     private final Map<String, SeatStatus> seats;
 
+    @JsonIgnore
     private Object syncReleaseAndPurchase = new Object();
 
-    public synchronized List<String> reserveAll(List<String> seatsToReserve) {
-        return null;
-    }
 
     public List<String> releaseAll(List<String> seatsToRelease) {
         synchronized (syncReleaseAndPurchase) {

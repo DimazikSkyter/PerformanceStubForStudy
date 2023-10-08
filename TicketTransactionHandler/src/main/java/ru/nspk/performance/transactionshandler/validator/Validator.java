@@ -1,6 +1,8 @@
 package ru.nspk.performance.transactionshandler.validator;
 
-public interface Validator <M> {
+import lombok.NonNull;
 
-    void validate(M model);
+public interface Validator<M> {
+
+    void validate(@NonNull M model);
 }

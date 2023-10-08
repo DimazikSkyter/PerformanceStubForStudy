@@ -29,29 +29,41 @@ public class ReserveServiceWithTimeout implements ReserveService {
 
     @Override
     public ReserveResponse reserve(String eventName, List<String> seats) {
-        Event event = Optional.ofNullable(eventService.getEvents().get(eventName)).orElseThrow(() -> new EventNotFound(eventName));
+        try {
+            Event event = Optional.ofNullable(eventService.getEvents().get(eventName)).orElseThrow(() -> new EventNotFound(eventName));
 
-        Set<Map.Entry<String, SeatStatus>> nonFreeSeats = Set.of();
-        synchronized (event) {
-            nonFreeSeats = seats.stream()
-                    .map(seat -> Map.entry(seat, event.getSeats().get(seat)))
-                    .filter(entry -> !entry.getValue().equals(SeatStatus.FREE))
-                    .collect(Collectors.toSet());
-            if (nonFreeSeats.isEmpty()) {
-                seats.forEach(seat -> event.getSeats().put(seat, SeatStatus.RESERVED));
-                int reserveId = reserveSequence.getAndIncrement();
-                reserveCache.putReserve(reserveId, new Reserve(event, Instant.now(), seats));
+            Set<Map.Entry<String, SeatStatus>> nonFreeSeats;
+            synchronized (event) {
+                nonFreeSeats = seats.stream()
+                        .map(seat -> Map.entry(seat, event.getSeats().get(seat)))
+                        .filter(entry -> !entry.getValue().equals(SeatStatus.FREE))
+                        .collect(Collectors.toSet());
+                if (nonFreeSeats.isEmpty()) {
+                    seats.forEach(seat -> event.getSeats().put(seat, SeatStatus.RESERVED));
+                    int reserveId = reserveSequence.getAndIncrement();
+                    reserveCache.putReserve(reserveId, new Reserve(event, Instant.now(), seats));
+                    return ReserveResponse.builder()
+                            .reserveId(reserveId)
+                            .nonFreeSeats(Set.of())
+                            .reserveStarted(Instant.now())
+                            .build();
+                }
                 return ReserveResponse.builder()
-                        .reserveId(reserveId)
-                        .nonFreeSeats(Set.of())
-                        .reserveStarted(Instant.now())
+                        .reserveId(-1)
+                        .nonFreeSeats(nonFreeSeats.stream().map(Map.Entry::getKey).collect(Collectors.toSet()))
                         .build();
             }
+        } catch (EventNotFound e) {
+            return ReserveResponse.builder()
+                    .reserveId(-1)
+                    .errorMessage("Event not found")
+                    .build();
+        }catch (Exception e) {
+            return ReserveResponse.builder()
+                    .reserveId(-1)
+                    .errorMessage("Failed to make reserve")
+                    .build();
         }
-        return ReserveResponse.builder()
-                .reserveId(-1)
-                .nonFreeSeats(nonFreeSeats.stream().map(Map.Entry::getKey).collect(Collectors.toSet()))
-                .build();
     }
 
     @Override

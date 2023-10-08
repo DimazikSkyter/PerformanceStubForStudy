@@ -1,0 +1,27 @@
+{
+  "simulation": "ru.performance.gatling.HttpSampleSimulation",
+  "simulationId": "httpsamplesimulation-20231008203257280",
+  "start": 1696797178585,
+  "description": "",
+  "scenarios": ["Root end point calls"],
+  "assertions": [
+{
+  "path": "Global",
+  "target": "95th percentile of response time",
+  "condition": "is less than",
+  "expectedValues": [1000.0],
+  "result": true,
+  "message": "Global: 95th percentile of response time is less than 1000.0",
+  "actualValue": [7.0]
+},
+{
+  "path": "Global",
+  "target": "percentage of successful events",
+  "condition": "is greater than",
+  "expectedValues": [95.0],
+  "result": true,
+  "message": "Global: percentage of successful events is greater than 95.0",
+  "actualValue": [100.0]
+}
+  ]
+}

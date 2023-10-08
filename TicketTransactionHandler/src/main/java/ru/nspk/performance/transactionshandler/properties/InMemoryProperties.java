@@ -6,9 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties
-public class ImdgProperties {
+@ConfigurationProperties(prefix = "in-memory")
+public class InMemoryProperties {
 
     private String charset;
     private long timeoutMs;
+    private String address;
 }

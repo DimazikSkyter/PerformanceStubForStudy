@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 public interface PaymentService {
 
-    CompletableFuture<HttpResponse<byte[]>> createPaymentLink(PaymentRequest paymentRequest) throws URISyntaxException, IOException, InterruptedException;
+    CompletableFuture<byte[]> createPaymentLink(PaymentRequest paymentRequest) throws ExecutionException, InterruptedException, TimeoutException;
 }

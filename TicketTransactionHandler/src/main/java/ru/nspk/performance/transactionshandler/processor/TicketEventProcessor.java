@@ -19,7 +19,7 @@ public class TicketEventProcessor {
     private static final Serde<String> STRING_SERDE = Serdes.String();
     private AtomicInteger atomicInteger = new AtomicInteger();
 
-    @Autowired
+    //@Autowired
     public void buildPipeline(StreamsBuilder streamsBuilder) {
 
         log.info("Current class link {}", ((Object) this).toString());
