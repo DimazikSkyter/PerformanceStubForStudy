@@ -5,11 +5,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum TransactionState {
     NEW_TRANSACTION(0),
-    RESERVED(1),
-    WAIT_FOR_PAYMENT(2),
-    WAIT_MERCHANT_APPROVE(3),
-    COMPLETE(4),
-    REJECT(4);
+
+    RESERVE_REQUEST(1),
+    RESERVED(2),
+    WAIT_FOR_PAYMENT(3),
+    WAIT_MERCHANT_APPROVE(4),
+    COMPLETE(5),
+    REJECT(5);
 
     private final int stage;
 

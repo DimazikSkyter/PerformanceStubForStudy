@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id 'java'
     id "io.freefair.lombok" version "6.5.1"
@@ -17,6 +19,8 @@ dependencies {
 
     implementation "com.google.protobuf:protobuf-java:3.14.0"
     implementation 'org.projectlombok:lombok:1.18.22'
+
+    implementation "com.fasterxml.jackson.core:jackson-databind:$fasterXmlVersion"
 
     testImplementation 'org.assertj:assertj-core:3.6.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
@@ -40,6 +44,9 @@ protobuf {
     // Configure the protoc executable
     protoc {
         // Download from repositories
-        artifact = 'com.google.protobuf:protoc:3.14.0:osx-x86_64' //:
+        if (Os.isFamily(Os.FAMILY_MAC))
+            artifact = 'com.google.protobuf:protoc:3.14.0:osx-x86_64' //:
+        else
+            artifact = 'com.google.protobuf:protoc:3.14.0' //:
     }
 }

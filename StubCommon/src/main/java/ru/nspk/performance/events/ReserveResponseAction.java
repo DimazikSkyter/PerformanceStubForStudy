@@ -1,10 +1,15 @@
-package ru.nspk.performance.transactionshandler.model;
+package ru.nspk.performance.events;
+
+import lombok.Data;
 
 import java.time.Duration;
 import java.time.Instant;
 
-public class ReserveResponseEvent extends Event {
+@Data
+public class ReserveResponseAction extends Action {
 
+    private String requestId;
+    private Long reserveId;
     private String reserveResponseStatus;
     private Instant limitToPay;
     private Instant reserveStarted;

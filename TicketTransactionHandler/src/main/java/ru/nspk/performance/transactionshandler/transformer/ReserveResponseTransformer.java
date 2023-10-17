@@ -1,11 +1,11 @@
 package ru.nspk.performance.transactionshandler.transformer;
 
 import ru.nspk.performance.theatre.model.ReserveResponse;
-import ru.nspk.performance.transactionshandler.model.ReserveResponseEvent;
+import ru.nspk.performance.events.ReserveResponseAction;
 
-public class ReserveResponseTransformer implements Transformer<ReserveResponse, ReserveResponseEvent> {
+public class ReserveResponseTransformer implements Transformer<ReserveResponse, ReserveResponseAction> {
 
-    public ReserveResponseEvent transform(ReserveResponse reserveResponse) {
+    public ReserveResponseAction transform(ReserveResponse reserveResponse) {
         return null;
     }
 }

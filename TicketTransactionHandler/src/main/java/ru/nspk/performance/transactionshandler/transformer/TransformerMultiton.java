@@ -13,4 +13,8 @@ public class TransformerMultiton {
     public <I, O> O transform(@NonNull I in) {
         return (O) transformers.get(in.getClass()).transform(in);
     }
+
+    public <I, O> O transform(@NonNull String in, Class<I> cls) {
+        return (O) transformers.get(cls).transform(in);
+    }
 }

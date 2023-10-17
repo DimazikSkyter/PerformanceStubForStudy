@@ -25,6 +25,11 @@ public class HazelcastManager implements KeyValueStorage {
     }
 
     @Override
+    public <K, V> V getAndIncrement(String map, K key) {
+        return ((HazelcastKeyValue<K, V>) keyValueMaps.get(map)).getAnd
+    }
+
+    @Override
     public <K, V> Tuple2<Boolean, V> updateWithCondition(String map, K key, Function<V, V> updateFunction, Function<V, Boolean> conditionFunction) {
         return ((HazelcastKeyValue<K, V>) keyValueMaps.get(map)).updateWithCondition(key, updateFunction, conditionFunction);
     }

@@ -15,6 +15,8 @@ import java.util.function.Consumer;
 //сделать через интерфейс ретрофита
 public interface TheatreClient {
 
+    //todo #task1 - make single event
+    //todo #task2 - make return event, not name
     Set<String> events() throws ExecutionException, InterruptedException, TimeoutException;
 
     Set<String> seats(String event) throws ExecutionException, InterruptedException, TimeoutException;
@@ -22,7 +24,7 @@ public interface TheatreClient {
     void reserve(String requestId,
                             long event,
                             List<String> seats,
-                            Consumer<ReserveResponse> callback) throws ExecutionException, InterruptedException, TimeoutException;
+                            Consumer<String> callback) throws ExecutionException, InterruptedException, TimeoutException;
 
     void release(long reserveId);
 

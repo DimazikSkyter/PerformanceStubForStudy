@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.jet.datamodel.Tuple2;
 import com.hazelcast.map.IMap;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import ru.nspk.performance.transactionshandler.properties.InMemoryProperties;
 
 import java.io.UnsupportedEncodingException;
@@ -15,9 +16,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Slf4j
 @RequiredArgsConstructor
 public class HazelcastKeyValue<K, V> {
 
+    private final String mapName;
     private final IMap<K, V> map;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final InMemoryProperties inMemoryProperties;
@@ -30,6 +33,26 @@ public class HazelcastKeyValue<K, V> {
                         inMemoryProperties.getTimeoutMs(),
                         TimeUnit.MILLISECONDS)
                 .thenAccept(afterPutFunction);
+    }
+
+    public V updateWithLock(K key, Function<V, V> updateFunction) throws InterruptedException {
+        boolean lock = map.tryLock(key, inMemoryProperties.getLockTimeoutMs(), TimeUnit.MILLISECONDS);
+        V value = null;
+        try {
+            if (lock) {
+                value = map.get(key);
+                V newValue = updateFunction.apply(value);
+                map.put(key, newValue, inMemoryProperties.getTimeoutMs(), TimeUnit.MILLISECONDS);
+            }
+        }  finally {
+            try {
+                if (map.isLocked(key))
+                    map.unlock(key);
+            } catch (Exception e) {
+                log.error("Failed to unlock map {} with key {}", mapName, key, e);
+            }
+        }
+        return value;
     }
 
     public Tuple2<Boolean, V> updateWithCondition(K key,

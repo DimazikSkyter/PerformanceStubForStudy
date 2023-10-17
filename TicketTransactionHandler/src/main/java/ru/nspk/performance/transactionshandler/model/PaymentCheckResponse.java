@@ -7,5 +7,5 @@ import lombok.Data;
 public class PaymentCheckResponse {
 
     private long requestId;
-    private boolean paymentStatusSuccess;
+    private boolean paymentStatus;
 }

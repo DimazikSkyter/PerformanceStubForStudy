@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+//todo #task3 переименовать эвент, чтобы не было дублирование имени
 @Data
 @RequiredArgsConstructor(onConstructor = @__(@JsonCreator))
 public class Event {

@@ -1,6 +1,7 @@
 package ru.nspk.performance.transactionshandler.theatreclient;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
 import org.springframework.core.ParameterizedTypeReference;
@@ -51,14 +52,14 @@ public class TheatreClientImpl implements TheatreClient {
     }
 
     @Override
-    public void reserve(String requestId, long event, List<String> seats, Consumer<ReserveResponse> callback) throws ExecutionException, InterruptedException, TimeoutException {
+    public void reserve(String requestId, long event, List<String> seats, Consumer<String> callback) throws ExecutionException, InterruptedException, TimeoutException {
         client.post()
                 .uri(uriBuilder -> uriBuilder.path("/theatre/reserve")
                         .queryParam("event", event)
                         .queryParam("seat", String.join(",", seats)).build())
                 .header("REQUEST_ID", requestId)
                 .retrieve()
-                .bodyToMono(ReserveResponse.class)
+                .bodyToMono(String.class)
                 .toFuture()
                 .thenAccept(callback)
                 .orTimeout(1, TimeUnit.MILLISECONDS);

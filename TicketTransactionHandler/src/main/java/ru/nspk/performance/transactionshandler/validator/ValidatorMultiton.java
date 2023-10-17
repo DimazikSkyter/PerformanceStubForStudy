@@ -1,6 +1,7 @@
 package ru.nspk.performance.transactionshandler.validator;
 
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
@@ -8,9 +9,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ValidatorMultiton {
 
-    private final Map<Class, Validator> validators;
+    private final Map<Class, InputValidator> inputValidators;
+    private final Map<Class, ModelValidator> modelValidators;
 
-    public void validate(Object object) {
-        validators.get(object.getClass()).validate(object);
+    public void validateInput(@NonNull String model, Class cls) {
+        inputValidators.get(cls).validateInput(model);
+    }
+
+    public void validateModel(@NonNull Object model) {
+        modelValidators.get(model.getClass()).validateModel(model);
     }
 }

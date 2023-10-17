@@ -1,6 +1,5 @@
 package ru.nspk.performance.transactionshandler.processor;
 
-import lombok.Builder;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.LongDeserializer;
@@ -15,19 +14,17 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.nspk.performance.transactionshandler.KafkaConfig;
 
 import java.util.List;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {TicketEventProcessorTest.Config.class})
+@SpringBootTest(classes = {TicketActionProcessorTest.Config.class})
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("kafka")
 @Slf4j
-class TicketEventProcessorTest {
+class TicketActionProcessorTest {
 
     @Autowired
     private TicketEventProcessor ticketEventProcessor;

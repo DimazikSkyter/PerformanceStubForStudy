@@ -12,4 +12,5 @@ public class InMemoryProperties {
     private String charset;
     private long timeoutMs;
     private String address;
+    private long lockTimeoutMs;
 }

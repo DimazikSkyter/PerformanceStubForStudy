@@ -1,22 +1,25 @@
 import io.gatling.gradle.LogHttp
-
+import org.gradle.api.internal.artifacts.configurations.MutationValidator
 plugins {
     kotlin("jvm")
     kotlin("plugin.allopen")
-
     id("io.gatling.gradle") version "3.9.5.5"
+}
+
+
+tasks {
+    "build" {
+        dependsOn(fatJar)
+    }
+}
+
+repositories {
+    mavenCentral()
 }
 
 group = "ru.performance.gatlingtest"
 version = "1.0-SNAPSHOT"
 
-
-
-sourceSets {
-    gatling {
-
-    }
-}
 
 gatling {
     // WARNING: options below only work when logback config file isn't provided
@@ -39,15 +42,30 @@ gatling {
 //    with(tasks.jar.get() as CopySpec)
 //}
 
-dependencies {
 
+tasks.test {
+    useJUnitPlatform()
+}
+dependencies {
+    gatling("org.reflections:reflections:0.9.12")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
-repositories {
-    mavenCentral()
+
+val jar by tasks.getting(Jar::class) {
+    manifest {
+        attributes["Main-Class"] = "ru.performance.gatling.Main"
+    }
 }
-tasks.test {
-    useJUnitPlatform()
+val fatJar = task("fatJar", type = Jar::class) {
+    manifest {
+        attributes["Main-Class"] = "ru.performance.gatling.Main"
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from(files(sourceSets.gatling.get().output.classesDirs))
+    from(files(sourceSets.gatling.get().output))
+    from(configurations.runtimeClasspath.get().map {  if (it.isDirectory()) it else zipTree(it)  })
+    with(tasks["jar"] as CopySpec)
 }
