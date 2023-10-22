@@ -18,8 +18,8 @@ public class TicketRequestTransformer implements Transformer<TicketRequest, Tick
 
     @Override
     public @NonNull TicketTransactionState transform(TicketRequest in) {
-        keyValueStorage.updateWithCondition()
-                .get("T", )
-        return null;
+//        keyValueStorage.updateWithCondition()
+//                .get("T", )
+        return TicketTransactionState.builder().build();
     }
 }

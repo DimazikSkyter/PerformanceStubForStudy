@@ -1,11 +1,19 @@
 import io.gatling.gradle.LogHttp
 import org.gradle.api.internal.artifacts.configurations.MutationValidator
+import java.net.URI
+
 plugins {
     kotlin("jvm")
     kotlin("plugin.allopen")
     id("io.gatling.gradle") version "3.9.5.5"
 }
 
+
+sourceSets {
+    main {
+        scala.setSrcDirs(listOf("gatling"))
+    }
+}
 
 tasks {
     "build" {
@@ -15,6 +23,8 @@ tasks {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") } // Replace with the GitHub repository URL
+    jcenter()
 }
 
 group = "ru.performance.gatlingtest"
@@ -47,6 +57,11 @@ tasks.test {
     useJUnitPlatform()
 }
 dependencies {
+
+    // https://mvnrepository.com/artifact/io.gatling.highcharts/gatling-charts-highcharts
+    implementation("io.gatling.highcharts:gatling-charts-highcharts:3.9.5")
+    implementation("ru.tinkoff:gatling-jdbc-plugin_2.13:0.10.3")
+    implementation("io.gatling:gatling-test-framework:3.9.5")
     gatling("org.reflections:reflections:0.9.12")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

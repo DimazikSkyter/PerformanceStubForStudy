@@ -73,10 +73,10 @@ public class AppConfiguration {
         Map<String, HazelcastKeyValue> maps = new HashMap<>();
         //requests
         IMap<String, Long> requestsMap = hazelcastInstance.getMap(TransactionalEventService.REQUESTS_MAP);
-        maps.put(TransactionalEventService.REQUESTS_MAP, new HazelcastKeyValue(requestsMap, inMemoryProperties));
+        maps.put(TransactionalEventService.REQUESTS_MAP, new HazelcastKeyValue(TransactionalEventService.REQUESTS_MAP, requestsMap, inMemoryProperties));
 
         IMap<Long, TicketTransactionState> transactionStateMap = hazelcastInstance.getMap(TransactionalEventService.TRANSACTIONS_MAP);
-        maps.put(TransactionalEventService.TRANSACTIONS_MAP, new HazelcastKeyValue(transactionStateMap, inMemoryProperties));
+        maps.put(TransactionalEventService.TRANSACTIONS_MAP, new HazelcastKeyValue(TransactionalEventService.TRANSACTIONS_MAP, transactionStateMap, inMemoryProperties));
         return maps;
     }
 

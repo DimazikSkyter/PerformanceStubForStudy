@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -25,8 +26,14 @@ public class HazelcastManager implements KeyValueStorage {
     }
 
     @Override
-    public <K, V> V getAndIncrement(String map, K key) {
-        return ((HazelcastKeyValue<K, V>) keyValueMaps.get(map)).getAnd
+    public <K> long getAndIncrement(String map, K key) throws InterruptedException {
+        return Optional.ofNullable(((HazelcastKeyValue<K, Long>) keyValueMaps.get(map)).updateWithLock(key, current -> {
+            if (current == null) {
+                return 1L;
+            } else {
+                return current + 1;
+            }
+        })).orElse(0L);
     }
 
     @Override

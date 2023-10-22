@@ -26,10 +26,15 @@ public class QrStreamDecorator {
         return qrReader.readQrFromBufferedImage(bufferedImage);
     }
 
-    public DataOutputStream createQrOutputStream(QrData qrData) throws WriterException, IOException {
-        BufferedImage bufferedImage = qrGenerator.generate(qrData);
-        DataOutputStream dataOutputStream = new DataOutputStream(new ByteArrayOutputStream());
-        ImageIO.write(bufferedImage, FORMAT, dataOutputStream);
+    public DataOutputStream createQrOutputStream(QrData qrData) {
+        DataOutputStream dataOutputStream;
+        try {
+            BufferedImage bufferedImage = qrGenerator.generate(qrData);
+            dataOutputStream = new DataOutputStream(new ByteArrayOutputStream());
+            ImageIO.write(bufferedImage, FORMAT, dataOutputStream);
+        } catch (Exception e) {
+            throw  new RuntimeException("Failed to create qr");
+        }
         return dataOutputStream;
     }
 }
