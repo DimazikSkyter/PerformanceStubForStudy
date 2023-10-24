@@ -20,7 +20,7 @@ class HttpSampleSimulation: Simulation() {
         .exec(http("root end point").get("/theatre/events"));
 
         init {
-            setUp(scn.injectOpen(constantUsersPerSec(1.0).during(Duration.ofSeconds(30))))
+            setUp(scn.injectOpen(constantUsersPerSec(1.0).during(Duration.ofSeconds(60))))
                 .protocols(httpProtocol)
                 .assertions(
                     global().responseTime().percentile3().lt(1000),
