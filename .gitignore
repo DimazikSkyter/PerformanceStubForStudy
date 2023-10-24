@@ -4,3 +4,11 @@
 /gradlew
 /gradlew.bat
 /StubCommon/build/
+.DS_Store
+GatlingTest/build/
+PaymentSystem/build/
+Theatre/build/
+TicketApi/build/
+TicketTransactionHandler/build/
+build/libs/
+build/tmp/
