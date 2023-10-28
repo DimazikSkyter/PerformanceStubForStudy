@@ -1,10 +1,8 @@
 package ru.nspk.performance.transactionshandler.theatreclient;
 
 
-import ru.nspk.performance.theatre.model.PurchaseResponse;
-import ru.nspk.performance.theatre.model.ReserveResponse;
+import ru.nspk.performance.theatre.dto.PurchaseResponse;
 
-import javax.security.auth.callback.Callback;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;

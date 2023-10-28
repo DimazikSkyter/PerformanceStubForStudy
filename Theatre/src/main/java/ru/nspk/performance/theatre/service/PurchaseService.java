@@ -1,6 +1,6 @@
 package ru.nspk.performance.theatre.service;
 
-import ru.nspk.performance.theatre.model.PurchaseResponse;
+import ru.nspk.performance.theatre.dto.PurchaseResponse;
 
 public interface PurchaseService {
 

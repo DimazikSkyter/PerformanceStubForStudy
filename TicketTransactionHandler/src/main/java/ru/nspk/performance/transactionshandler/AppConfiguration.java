@@ -53,8 +53,14 @@ public class AppConfiguration {
                 Pair.of("request_id", "\"request_id\"\\s*:\\s*\\d+"),
                 Pair.of("payment_status", "\"payment_status\"\\s*:\\s*(true|false)")
         );
+
+        List<Pair<String, String>> reserveResponseActionPatterns = List.of(
+                Pair.of("request_id", "\"request_id\"\\s*:\\s*\\d+"),
+                Pair.of("reserve_id", "\"reserve_id\"\\s*:\\s*(true|false)")
+        );
+
         inputValidators.put(PaymentCheckResponse.class, new PaymentCheckResponseInputValidator(paymentCheckResponsePatterns));
-        inputValidators.put(ReserveResponseAction.class, new ReserveResponseEventInputValidator());
+        inputValidators.put(ReserveResponseAction.class, new ReserveResponseEventInputValidator(reserveResponseActionPatterns));
         Map<Class, ModelValidator> modelValidators = new HashMap<>();
         modelValidators.put(TicketRequest.class, new TicketRequestInputValidator(keyValueStorage, theatreClient));
         return new ValidatorMultiton(inputValidators, modelValidators);

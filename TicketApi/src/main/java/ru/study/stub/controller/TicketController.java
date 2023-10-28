@@ -15,12 +15,12 @@ import java.util.Map;
 @RestController
 @RequestMapping("/storage/api")
 @AllArgsConstructor
-public class StubApiController implements TicketApi {
+public class TicketController implements TicketApi {
 
     private TicketService ticketService;
 
     @PutMapping("/ticket")
-    public ResponseEntity createNewTicket(@RequestBody TicketDto ticketDto) {
+    public ResponseEntity buyTickets(@RequestBody TicketDto ticketDto) {
         try {
             return ResponseEntity.ok(ticketService.createNewTicket(ticketDto));
         } catch (EventNotFoundException ex) {
@@ -39,7 +39,7 @@ public class StubApiController implements TicketApi {
     @GetMapping("/ticket/status/{uid}")
     public ResponseEntity checkTicketStatus(@PathVariable("uid") String uid) {
         try {
-            return ResponseEntity.ok(ticketService.createNewTicket(null));
+            return ResponseEntity.ok(ticketService.checkTicket(uid));
         } catch (NullPointerException ex) {
             return ResponseEntity.status(404).body(
                     Map.of("error", "Ticket " + uid + " not found."));
@@ -50,14 +50,8 @@ public class StubApiController implements TicketApi {
         }
     }
 
-    @PutMapping("/subscribe")
-    public ResponseEntity subscribeToPush(@RequestBody Subscriber subscriber) {
+    @PatchMapping("/ticket/cancel/{uid}")
+    public ResponseEntity cancelTicket(@PathVariable String uid) {
         return null;
     }
-
-    @DeleteMapping("/subscribe")
-    public ResponseEntity unSubscribeToPush(@RequestBody Subscriber subscriber) {
-        return null;
-    }
-
 }

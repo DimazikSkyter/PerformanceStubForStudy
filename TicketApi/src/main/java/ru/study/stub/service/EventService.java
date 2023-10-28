@@ -6,7 +6,6 @@ import java.time.Duration;
 
 public interface EventService {
 
-    double findEventAndGetItPrice(Event event);
 
     Duration getTimeToPay(Event event);
 }

@@ -15,7 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.nspk.performance.theatre.TheatreApp;
-import ru.nspk.performance.theatre.model.ReserveResponse;
+import ru.nspk.performance.theatre.dto.ReserveResponse;
 import ru.nspk.performance.theatre.service.EventService;
 import ru.nspk.performance.theatre.service.PurchaseService;
 import ru.nspk.performance.theatre.service.ReserveService;

@@ -1,28 +1,33 @@
 package ru.study.stub.service;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.study.stub.exception.EventNotFoundException;
 import ru.study.stub.model.Event;
+import ru.study.stub.theatre.TheatreClient;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
-@AllArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
 
-    private Map<String, Double> events;
+    private AtomicReference<Map<String, Double>> events = new AtomicReference<>(new HashMap<>());
+    private final TheatreClient theatreClient;
 
-    @Override
-    public double findEventAndGetItPrice(Event event) {
-        double basePrice = Optional.ofNullable(events.get(event.getEventName()))
-                .orElseThrow(() -> new EventNotFoundException(event.getEventName()));
-        return basePrice * event.getEventLevel().getCoeff();
+
+    @Scheduled(cron = "*/5 * * * *")
+    public void updateEvents() {
+
     }
 
     @Override

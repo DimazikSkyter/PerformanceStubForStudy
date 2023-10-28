@@ -18,6 +18,11 @@ class ValidatorsTest {
             Pair.of("payment_status", "\"payment_status\"\\s*:\\s*(true|false)")
     );
 
+    List<Pair<String, String>> reserveResponseActionPatterns = List.of(
+            Pair.of("request_id", "\"request_id\"\\s*:\\s*\\d+"),
+            Pair.of("reserve_id", "\"reserve_id\"\\s*:\\s*\\d+")
+    );
+
     @Test
     void paymentCheckResponsePositive() throws IOException {
         String paymentResponse = new String(Objects.requireNonNull(this.getClass()
@@ -45,26 +50,26 @@ class ValidatorsTest {
 
     @Test
     void reserveResponseEventPositive() throws IOException {
-        String paymentRequest = new String(Objects.requireNonNull(this.getClass()
-                        .getClassLoader()
-                        .getResourceAsStream("reserve-response-event-positive.json"))
-                .readAllBytes());
-        log.info("Income positive reserve response '{}'", paymentRequest);
-
-        InputValidator inputValidator = new PaymentCheckResponseInputValidator(paymentCheckResponsePatterns);
-
-        Assertions.assertDoesNotThrow(() -> inputValidator.validateInput(paymentRequest));
-    }
-
-    @Test
-    void reserveResponseEventNegative() throws IOException {
         String reserveResponseEvent = new String(Objects.requireNonNull(this.getClass()
                         .getClassLoader()
                         .getResourceAsStream("reserve-response-event-positive.json"))
                 .readAllBytes());
         log.info("Income positive reserve response '{}'", reserveResponseEvent);
 
-        InputValidator inputValidator = new PaymentCheckResponseInputValidator(paymentCheckResponsePatterns);
+        InputValidator inputValidator = new ReserveResponseEventInputValidator(reserveResponseActionPatterns);
+
+        Assertions.assertDoesNotThrow(() -> inputValidator.validateInput(reserveResponseEvent));
+    }
+
+    @Test
+    void reserveResponseEventNegative() throws IOException {
+        String reserveResponseEvent = new String(Objects.requireNonNull(this.getClass()
+                        .getClassLoader()
+                        .getResourceAsStream("reserve-response-event-negative.json"))
+                .readAllBytes());
+        log.info("Income negative reserve response '{}'", reserveResponseEvent);
+
+        InputValidator inputValidator = new ReserveResponseEventInputValidator(reserveResponseActionPatterns);
 
         Assertions.assertThrows(ValidationException.class, () -> inputValidator.validateInput(reserveResponseEvent));
     }

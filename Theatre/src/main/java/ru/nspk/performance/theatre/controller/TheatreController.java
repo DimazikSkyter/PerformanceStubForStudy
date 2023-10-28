@@ -3,8 +3,7 @@ package ru.nspk.performance.theatre.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.nspk.performance.theatre.model.PurchaseResponse;
-import ru.nspk.performance.theatre.model.ReserveResponse;
+import ru.nspk.performance.theatre.dto.*;
 import ru.nspk.performance.theatre.service.EventService;
 import ru.nspk.performance.theatre.service.PurchaseService;
 import ru.nspk.performance.theatre.service.ReserveService;
@@ -27,7 +26,7 @@ public class TheatreController {
     }
 
     @GetMapping("/seats/{event}")
-    public Set<String> seats(@PathVariable String event) {
+    public SeatResponse seats(@PathVariable String event) {
         return eventService.seats(event);
     }
 
@@ -37,8 +36,8 @@ public class TheatreController {
     }
 
     @PostMapping("/release")
-    public void release(@RequestParam(name = "reserve_id") long reserveId) {
-        reserveService.release(reserveId);
+    public ReleaseResponse release(@RequestParam(name = "reserve_id") long reserveId) {
+        return reserveService.release(reserveId);
     }
 
     @PostMapping("/purchase")

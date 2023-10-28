@@ -1,4 +1,4 @@
-package ru.nspk.performance.theatre.model;
+package ru.nspk.performance.theatre.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.nspk.performance.theatre.exception.SeatsAlreadySoldException;
-import ru.nspk.performance.theatre.model.PurchaseResponse;
+import ru.nspk.performance.theatre.dto.PurchaseResponse;
 
 @Slf4j
 @Service

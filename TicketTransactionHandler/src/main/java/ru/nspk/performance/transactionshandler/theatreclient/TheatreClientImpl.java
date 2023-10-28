@@ -1,7 +1,6 @@
 package ru.nspk.performance.transactionshandler.theatreclient;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.protocol.types.Field;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
 import org.springframework.core.ParameterizedTypeReference;
@@ -9,8 +8,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import ru.nspk.performance.theatre.model.PurchaseResponse;
-import ru.nspk.performance.theatre.model.ReserveResponse;
+import ru.nspk.performance.theatre.dto.PurchaseResponse;
 
 import java.util.List;
 import java.util.Set;
