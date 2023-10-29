@@ -28,7 +28,7 @@ public class TheatreAppConfig {
         String eventsFile = new String(Objects.requireNonNull(Files.readAllBytes(Path.of(eventsProperties.getPath()))));
         TypeReference<Map<String, Event>> typeReference = new TypeReference<Map<String, Event>>() {
         };
-        log.info("Events file is: \n{}", eventsFile);
+        log.debug("Events file is: \n{}", eventsFile);
         return new ObjectMapper().registerModule( new ParameterNamesModule() ).readValue(eventsFile, typeReference);
     }
 }

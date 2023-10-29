@@ -12,3 +12,5 @@ TicketApi/build/
 TicketTransactionHandler/build/
 build/libs/
 build/tmp/
+/test-reports/
+/test-reports/

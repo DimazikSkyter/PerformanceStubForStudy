@@ -13,6 +13,7 @@ public class Reserve {
     private Event event;
     private Instant createdAt;
     private List<String> seats;
+    private double sum;
 
     public void purchase() {
         event.purchase(seats);

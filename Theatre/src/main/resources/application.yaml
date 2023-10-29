@@ -1,8 +1,25 @@
 events:
   path: e:\tmp\Events.json
-
 cache:
-  timeout: PT30S
+  timeout: PT5M
+logging:
+  level:
+    liquibase: trace
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: admin
+    hikari:
+      schema: theatre
+  liquibase:
+    enabled: true
+    change-log: classpath*:db/changelog/changelog-master.xml
+    liquibase-schema: theatre
 management:
   server:
     port: 8081

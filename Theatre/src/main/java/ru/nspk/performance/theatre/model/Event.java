@@ -38,7 +38,7 @@ public class Event {
     public void purchase(List<String> seatsToPurchase) {
         synchronized (syncReleaseAndPurchase) {
             List<String> alreadySold = seatsToPurchase.stream()
-                    .filter(seat -> seats.get(seat).seatStatus().equals(SeatStatus.RESERVED))
+                    .filter(seat -> seats.get(seat).seatStatus().equals(SeatStatus.BOUGHT))
                     .toList();
             if (alreadySold.isEmpty()) {
                 seatsToPurchase.forEach(seat -> seats.put(seat, new Seat(SeatStatus.BOUGHT, seats.get(seat).price())));

@@ -9,7 +9,7 @@ import io.gatling.javaapi.http.HttpProtocolBuilder
 import java.time.Duration
 
 
-class HttpSampleSimulation: Simulation() {
+class MainHttpSampleSimulation: Simulation() {
 
     var httpProtocol: HttpProtocolBuilder = http.baseUrl("http://localhost:8080")
         .header("Content-Type", "application/json")

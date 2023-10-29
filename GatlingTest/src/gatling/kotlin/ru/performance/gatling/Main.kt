@@ -2,14 +2,12 @@ package ru.performance.gatling
 
 import io.gatling.app.Gatling
 import io.gatling.core.config.GatlingPropertiesBuilder
-import java.util.*
-import java.util.stream.Collectors
 
 class Main {
 
     companion object {
         @JvmStatic fun main(args: Array<String>) {
-            val simulations: Set<String> = setOf(HttpSampleSimulation::class.java.name)
+            val simulations: Set<String> = setOf(MainHttpSampleSimulation::class.java.name)
             simulations.forEach(Main::runGatlingSimulation)
         }
         private fun runGatlingSimulation(simulationFileName: String) {

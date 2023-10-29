@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,6 +32,7 @@ public class ReserveServiceWithTimeout implements ReserveService {
 
     @Override
     public ReserveResponse reserve(String eventName, List<String> seats) {
+        log.debug("Make new reserve for event {} and seats {}", eventName, seats);
         try {
             Event event = Optional.ofNullable(eventService.getEvents().get(eventName)).orElseThrow(() -> new EventNotFound(eventName));
 
@@ -41,9 +43,14 @@ public class ReserveServiceWithTimeout implements ReserveService {
                         .filter(entry -> !entry.getValue().seatStatus().equals(SeatStatus.FREE))
                         .collect(Collectors.toSet());
                 if (nonFreeSeats.isEmpty()) {
-                    seats.forEach(seat -> event.getSeats().put(seat, new Seat(SeatStatus.RESERVED, event.getSeats().get(seat).price())));
+                    AtomicReference<Double> sum = new AtomicReference<>(0D);
+                    seats.forEach(seat -> {
+                        double price = event.getSeats().get(seat).price();
+                        event.getSeats().put(seat, new Seat(SeatStatus.RESERVED, price));
+                        sum.accumulateAndGet(price, Double::sum);
+                    });
                     int reserveId = reserveSequence.getAndIncrement();
-                    reserveCache.putReserve(reserveId, new Reserve(event, Instant.now(), seats));
+                    reserveCache.putReserve(reserveId, new Reserve(event, Instant.now(), seats, sum.get()));
                     return ReserveResponse.builder()
                             .reserveId(reserveId)
                             .nonFreeSeats(Set.of())

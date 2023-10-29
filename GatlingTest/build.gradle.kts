@@ -58,6 +58,7 @@ tasks.test {
 }
 dependencies {
 
+    implementation("org.postgresql:postgresql:42.4.3")
     // https://mvnrepository.com/artifact/io.gatling.highcharts/gatling-charts-highcharts
     implementation("io.gatling.highcharts:gatling-charts-highcharts:3.9.5")
     implementation("ru.tinkoff:gatling-jdbc-plugin_2.13:0.10.3")

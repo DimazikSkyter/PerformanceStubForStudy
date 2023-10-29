@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1" author="tsitmande">
+        <createTable tableName="purchase" schemaName="theatre">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="purchase_id_pk"/>
+            </column>
+            <column name="event" type="varchar(250)"/>
+            <column name="reserve_id" type="bigint"/>
+            <column name="sum" type="double"/>
+            <column name="seats" type="jsonb"/>
+            <column name="event_date" type="date"/>
+            <column name="timestamp" type="timestamp"/>
+        </createTable>
+        <addAutoIncrement tableName="purchase" columnName="id" columnDataType="bigint" startWith="1" incrementBy="1"/>
+    </changeSet>
+</databaseChangeLog>
