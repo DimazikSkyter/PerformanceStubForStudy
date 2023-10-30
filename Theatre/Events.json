@@ -1,0 +1,135 @@
+{
+	"event1": {
+		"name" : "рок концерт 1",
+		"eventDate" : "2023-10-01",
+		"seats": {
+			"1A": {
+				"seatStatus" : "FREE",
+				"price" : 12
+			},
+			"2A": {
+				"seatStatus" : "FREE",
+				"price" : 13.5
+			},
+			"3A": {
+				"seatStatus" : "FREE",
+				"price" : 13.5
+			},
+			"4A": {
+				"seatStatus" : "FREE",
+				"price" : 13.5
+			},
+			"5A": {
+				"seatStatus" : "FREE",
+				"price" : 5.1
+			},
+			"1B": {
+				"seatStatus" : "FREE",
+				"price" : 5.1
+			},
+			"2B": {
+				"seatStatus" : "FREE",
+				"price" : 5.1
+			},
+			"3B": {
+				"seatStatus" : "FREE",
+				"price" : 5.1
+			},
+			"4B": {
+				"seatStatus" : "FREE",
+				"price" : 15.4
+			},
+			"5B": {
+				"seatStatus" : "FREE",
+				"price" : 15.4
+			}
+		}
+		
+	},
+	"event2": {
+		"name" : "оркестр 123",
+		"eventDate" : "2023-10-01",
+		"seats": {
+			"1A": {
+				"seatStatus" : "FREE",
+				"price" : 13.4
+			},
+			"2A": {
+				"seatStatus" : "FREE",
+				"price" : 13.4
+			},
+			"3A": {
+				"seatStatus" : "FREE",
+				"price" : 13.4
+			},
+			"4A": {
+				"seatStatus" : "FREE",
+				"price" : 13.4
+			},
+			"5A": {
+				"seatStatus" : "FREE",
+				"price" : 12
+			},
+			"1B": {
+				"seatStatus" : "FREE",
+				"price" : 12
+			},
+			"2B": {
+				"seatStatus" : "FREE",
+				"price" : 12
+			},
+			"3B": {
+				"seatStatus" : "FREE",
+				"price" : 12
+			},
+			"4B": {
+				"seatStatus" : "FREE",
+				"price" : 12
+			},
+			"5B": {
+				"seatStatus" : "FREE",
+				"price" : 12
+			},
+			"6A": {
+				"seatStatus" : "FREE",
+				"price" : 18
+			},
+			"7A": {
+				"seatStatus" : "FREE",
+				"price" : 18
+			},
+			"8A": {
+				"seatStatus" : "FREE",
+				"price" : 18
+			},
+			"9A": {
+				"seatStatus" : "FREE",
+				"price" : 18
+			},
+			"10A": {
+				"seatStatus" : "FREE",
+				"price" : 18
+			},
+			"6B": {
+				"seatStatus" : "FREE",
+				"price" : 21
+			},
+			"7B": {
+				"seatStatus" : "FREE",
+				"price" : 21
+			},
+			"8B": {
+				"seatStatus" : "FREE",
+				"price" : 21
+			},
+			"9B": {
+				"seatStatus" : "FREE",
+				"price" : 21
+			},
+			"10B": {
+				"seatStatus" : "FREE",
+				"price" : 21
+			}
+		}
+	}
+}

@@ -31,8 +31,8 @@ public class TheatreController {
     }
 
     @PostMapping("/reserve")
-    public ReserveResponse reserve(@RequestParam(name = "event") String event, @RequestParam(name = "seat") List<String> seats) {
-        return reserveService.reserve(event, seats);
+    public ReserveResponse reserve(@RequestParam(name = "event") String event, @RequestParam(name = "seat") List<String> seats, @RequestHeader(name = "XREQUEST_ID") long requestId) {
+        return reserveService.reserve(event, seats, requestId);
     }
 
     @PostMapping("/release")
@@ -41,7 +41,7 @@ public class TheatreController {
     }
 
     @PostMapping("/purchase")
-    public PurchaseResponse purchase(@RequestParam long reserveId) {
+    public PurchaseResponse purchase(@RequestParam(name = "reserve_id") long reserveId) {
         return purchaseService.purchase(reserveId);
     }
 }

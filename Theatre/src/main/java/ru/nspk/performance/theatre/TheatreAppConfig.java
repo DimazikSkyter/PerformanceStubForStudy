@@ -25,7 +25,7 @@ public class TheatreAppConfig {
 
     @Bean
     public Map<String, Event> events(EventsProperties eventsProperties) throws IOException {
-        String eventsFile = new String(Objects.requireNonNull(Files.readAllBytes(Path.of(eventsProperties.getPath()))));
+        String eventsFile = new String(Objects.requireNonNull(Files.readAllBytes(Path.of(eventsProperties.getPath()).toAbsolutePath())));
         TypeReference<Map<String, Event>> typeReference = new TypeReference<Map<String, Event>>() {
         };
         log.debug("Events file is: \n{}", eventsFile);

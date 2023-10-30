@@ -31,7 +31,7 @@ public class ReserveServiceWithTimeout implements ReserveService {
     private AtomicInteger reserveSequence = new AtomicInteger();
 
     @Override
-    public ReserveResponse reserve(String eventName, List<String> seats) {
+    public ReserveResponse reserve(String eventName, List<String> seats, long requestId) {
         log.debug("Make new reserve for event {} and seats {}", eventName, seats);
         try {
             Event event = Optional.ofNullable(eventService.getEvents().get(eventName)).orElseThrow(() -> new EventNotFound(eventName));
@@ -55,21 +55,27 @@ public class ReserveServiceWithTimeout implements ReserveService {
                             .reserveId(reserveId)
                             .nonFreeSeats(Set.of())
                             .reserveStarted(Instant.now())
+                            .requestId(requestId)
                             .build();
                 }
                 return ReserveResponse.builder()
                         .reserveId(-1)
                         .nonFreeSeats(nonFreeSeats.stream().map(Map.Entry::getKey).collect(Collectors.toSet()))
+                        .errorMessage("Failed to make reserve, some of seats are not free.")
+                        .reserveDuration(null)
+                        .requestId(requestId)
                         .build();
             }
         } catch (EventNotFound e) {
             return ReserveResponse.builder()
                     .reserveId(-1)
                     .errorMessage("Event not found")
+                    .requestId(requestId)
                     .build();
         } catch (Exception e) {
             return ReserveResponse.builder()
                     .reserveId(-1)
+                    .requestId(requestId)
                     .errorMessage("Failed to make reserve")
                     .build();
         }

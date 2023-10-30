@@ -1,10 +1,13 @@
 package ru.nspk.performance.theatre.entity;
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,6 +19,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Purchase {
 
     @Id
@@ -28,6 +32,8 @@ public class Purchase {
 
     private double sum;
 
+    @Type(type = "jsonb")
+    @Column(name = "seats", columnDefinition = "jsonb")
     private String seats;
 
     @Temporal(TemporalType.DATE)

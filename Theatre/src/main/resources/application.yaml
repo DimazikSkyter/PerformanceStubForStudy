@@ -1,5 +1,5 @@
 events:
-  path: e:\tmp\Events.json
+  path: Theatre/Events.json
 cache:
   timeout: PT5M
 logging:
@@ -11,9 +11,9 @@ spring:
       ddl-auto: validate
     open-in-view: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5435/postgres
     username: postgres
-    password: admin
+    password: postgres
     hikari:
       schema: theatre
   liquibase:

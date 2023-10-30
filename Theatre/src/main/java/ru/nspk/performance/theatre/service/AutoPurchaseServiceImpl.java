@@ -1,5 +1,6 @@
 package ru.nspk.performance.theatre.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class AutoPurchaseServiceImpl implements PurchaseService {
 
     private final ReserveCache reserveCache;
     private final PurchaseRepository purchaseRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public PurchaseResponse purchase(long reserveId) {
@@ -27,7 +29,7 @@ public class AutoPurchaseServiceImpl implements PurchaseService {
                             .reserveId(reserveId)
                             .event(reserve.getEvent().getName())
                             .sum(reserve.getSum())
-                            .seats("[" + String.join(",", reserve.getSeats()) + "]")
+                            .seats(objectMapper.writeValueAsString(reserve.getSeats()))
                             .eventDate(reserve.getEvent().getEventDate())
                     .build());
         } catch (Exception e) {

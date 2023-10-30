@@ -1,5 +1,6 @@
 package ru.nspk.performance.theatre.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +14,11 @@ import java.util.Set;
 @Builder()
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReserveResponse {
 
     private long reserveId;
-    private long requestId;
+    private Long requestId;
     private Instant reserveStarted;
     private Set<String> nonFreeSeats;
     @Builder.Default
