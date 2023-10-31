@@ -58,6 +58,7 @@ tasks.test {
 }
 dependencies {
 
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.postgresql:postgresql:42.4.3")
     // https://mvnrepository.com/artifact/io.gatling.highcharts/gatling-charts-highcharts
     implementation("io.gatling.highcharts:gatling-charts-highcharts:3.9.5")

@@ -1,5 +1,6 @@
 package ru.performance.gatling
 
+import gatling.TheatreLoadSimulation
 import io.gatling.app.Gatling
 import io.gatling.core.config.GatlingPropertiesBuilder
 
@@ -7,7 +8,7 @@ class Main {
 
     companion object {
         @JvmStatic fun main(args: Array<String>) {
-            val simulations: Set<String> = setOf(JdbcSimulation::class.java.name)
+            val simulations: Set<String> = setOf(MainHttpSampleSimulation::class.java.name)
             simulations.forEach(Main::runGatlingSimulation)
         }
         private fun runGatlingSimulation(simulationFileName: String) {

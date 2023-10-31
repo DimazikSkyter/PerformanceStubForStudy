@@ -17,7 +17,7 @@ class MainHttpSampleSimulation: Simulation() {
         .check(status().`is`(200))
 
     var scn: ScenarioBuilder = scenario("Root end point calls")
-        .exec(http("root end point").get("/theatre/events"));
+        .exec(http("list of events").get("/theatre/events"));
 
         init {
             setUp(scn.injectOpen(constantUsersPerSec(1.0).during(Duration.ofSeconds(60))))
