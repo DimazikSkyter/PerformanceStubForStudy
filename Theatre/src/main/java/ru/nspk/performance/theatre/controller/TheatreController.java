@@ -25,13 +25,18 @@ public class TheatreController {
         return eventService.eventNames();
     }
 
+    @GetMapping("/events/{event}/info")
+    public EventDto eventInfo(@PathVariable("event") String eventName) {
+        return eventService.eventInfo(eventName);
+    }
+
     @GetMapping("/seats/{event}")
     public SeatResponse seats(@PathVariable String event) {
         return eventService.seats(event);
     }
 
     @PostMapping("/reserve")
-    public ReserveResponse reserve(@RequestParam(name = "event") String event, @RequestParam(name = "seat") List<String> seats, @RequestHeader(name = "XREQUEST_ID") long requestId) {
+    public ReserveResponse reserve(@RequestParam(name = "event") String event, @RequestParam(name = "seat") List<String> seats, @RequestHeader(name = "XREQUEST_ID", required = false) Long requestId) {
         return reserveService.reserve(event, seats, requestId);
     }
 

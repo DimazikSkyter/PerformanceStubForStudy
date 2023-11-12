@@ -166,7 +166,7 @@ public class TransactionalEventService {
 
 
             if (paymentCheckResponse.isPaymentStatus()) {
-                PaymentAction paymentEvent = new PaymentAction();
+                PaymentAction paymentEvent = PaymentAction.builder().build();
                 Tuple2<Boolean, TicketTransactionState> updateResult = keyValueStorage.<Long, TicketTransactionState>updateWithCondition(TRANSACTIONS_MAP, transactionId, currentTicketTransactionState -> {
                     currentTicketTransactionState.moveOnNextStep(TransactionState.WAIT_FOR_PAYMENT);
                     currentTicketTransactionState.getActions().put("Payment", paymentEvent);
@@ -215,7 +215,9 @@ public class TransactionalEventService {
     }
 
     public void makeReserve(TicketTransactionState ticketTransactionState) {
-        CreateReserveAction createReserveEvent = new CreateReserveAction(ticketTransactionState.getEvent().getSeats());
+        CreateReserveAction createReserveEvent = CreateReserveAction.builder()
+                .seats((ticketTransactionState.getEvent().getSeats()))
+                .build(); //todo поправить eventId
         String requestId = UUID.randomUUID().toString();
         try {
             keyValueStorage.put(REQUESTS_MAP, requestId, ticketTransactionState.getTransactionId(),

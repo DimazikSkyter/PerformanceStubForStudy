@@ -14,7 +14,6 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class KafkaProducer {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final KafkaTemplate<Long, byte[]> template;
     private KafkaProperties kafkaProperties;
 
@@ -22,7 +21,7 @@ public class KafkaProducer {
         return template.send(kafkaProperties.getEventTopic(), key, value);
     }
 
-    public CompletableFuture<SendResult<Long, byte[]>> sendTransactionState(TicketTransactionState ticketTransactionState) {
+    public CompletableFuture<SendResult<Long, byte[]>> sendTransactionState(TicketTransactionState ticketTransactionState) throws JsonProcessingException {
         return template.send(kafkaProperties.getTransactionStateTopic(), ticketTransactionState.getBytes());
     }
 

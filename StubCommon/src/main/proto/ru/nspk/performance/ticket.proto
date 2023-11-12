@@ -6,7 +6,7 @@ package ru.study.stub;
 option java_multiple_files = true;
 option java_package = "ru.study.stub.proto";
 option java_outer_classname = "TicketModel";
-
+//todo remove
 message Ticket {
   string fio = 1;
   int32 age = 2;

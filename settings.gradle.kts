@@ -18,3 +18,4 @@ include("Theatre") //апи театра у которого покупаютс�
 include("TicketTransactionHandler") //Система транзакции
 include("GatlingTest")
 include("StubCommon")
+include("JmeterCustomJar")

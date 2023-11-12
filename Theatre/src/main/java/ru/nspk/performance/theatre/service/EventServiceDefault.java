@@ -3,6 +3,7 @@ package ru.nspk.performance.theatre.service;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.nspk.performance.theatre.dto.EventDto;
 import ru.nspk.performance.theatre.dto.SeatDto;
 import ru.nspk.performance.theatre.dto.SeatResponse;
 import ru.nspk.performance.theatre.exception.EventNotFound;
@@ -48,5 +49,20 @@ public class EventServiceDefault implements EventService {
             return SeatResponse.failed(eventName, "No free seats in event");
         }
         return new SeatResponse(eventName, null, seatDtoSet);
+    }
+
+    @Override
+    public EventDto eventInfo(String eventName) {
+        Event event = events.get(eventName);
+        if (event == null) {
+            return EventDto.builder().build();
+        }
+        return EventDto.builder()
+                .date(event.getEventDate())
+                .type(event.getType())
+                .merchant(event.getMerchant())
+                .name(event.getName())
+                .exists(true)
+                .build();
     }
 }

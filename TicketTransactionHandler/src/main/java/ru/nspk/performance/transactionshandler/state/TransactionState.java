@@ -1,5 +1,6 @@
 package ru.nspk.performance.transactionshandler.state;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -13,6 +14,7 @@ public enum TransactionState {
     COMPLETE(5),
     REJECT(5);
 
+    @Getter
     private final int stage;
 
     public boolean isEarliestThan(TransactionState transactionState) {

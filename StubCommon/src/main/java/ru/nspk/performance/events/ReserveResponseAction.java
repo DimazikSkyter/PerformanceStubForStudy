@@ -1,11 +1,13 @@
 package ru.nspk.performance.events;
 
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 
 import java.time.Duration;
 import java.time.Instant;
 
 @Data
+@SuperBuilder
 public class ReserveResponseAction extends Action {
 
     private String requestId;

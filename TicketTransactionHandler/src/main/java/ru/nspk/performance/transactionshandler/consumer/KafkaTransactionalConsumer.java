@@ -15,7 +15,7 @@ public class KafkaTransactionalConsumer {
 
     private final TransactionalEventService transactionalEventService;
 
-    @KafkaListener(topics = "new_transaction_requests", groupId = "reader")
+    @KafkaListener(topics = "ticket_request", groupId = "reader")
     public void newTransaction(ConsumerRecord<?, TicketRequest> record) {
         try {
             transactionalEventService.newTicketEvent(record.value());

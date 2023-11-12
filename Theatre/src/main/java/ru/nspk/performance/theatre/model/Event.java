@@ -22,6 +22,8 @@ public class Event {
     private final Date eventDate;
     @JsonProperty("seats")
     private final Map<String, Seat> seats;
+    private final String merchant; //todo новое
+    private final String type; //todo новое
 
     @JsonIgnore
     private final Object syncReleaseAndPurchase = new Object();

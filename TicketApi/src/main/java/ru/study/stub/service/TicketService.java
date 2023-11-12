@@ -1,12 +1,15 @@
 package ru.study.stub.service;
 
 import ru.study.stub.dto.TicketDto;
+import ru.study.stub.dto.TicketPurchaseRequest;
+import ru.study.stub.dto.TicketPurchaseResponse;
 import ru.study.stub.entity.TicketStatus;
-import ru.study.stub.model.TicketResponse;
+
+import java.util.List;
 
 public interface TicketService {
 
-    TicketResponse createNewTicket(TicketDto ticketDto);
+    TicketPurchaseResponse createNewTicket(TicketPurchaseRequest tickets);
 
     TicketStatus checkTicket(String uid);
 }

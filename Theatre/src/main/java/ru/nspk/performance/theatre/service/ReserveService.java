@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ReserveService {
 
-    ReserveResponse reserve(String eventName, List<String> seats, long requestId);
+    ReserveResponse reserve(String eventName, List<String> seats, Long requestId);
 
     ReleaseResponse release(long reserveId);
 }

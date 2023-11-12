@@ -1,9 +1,10 @@
 package ru.study.stub.producer;
 
+import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
-import ru.study.stub.proto.Ticket;
+import ru.nspk.performance.api.TicketRequest;
 
 public interface QueueProducer {
 
-    ListenableFuture send(Ticket ticket);
+    ListenableFuture<SendResult<Long, byte[]>> send(TicketRequest ticketRequest);
 }

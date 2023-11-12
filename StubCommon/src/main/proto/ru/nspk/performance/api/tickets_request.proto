@@ -4,17 +4,16 @@ package ru.nspk.performance.api;
 
 
 import "google/protobuf/timestamp.proto";
-import "ru/nspk/performance/base/place_coordinate.proto";
+import "ru/nspk/performance/base/ticket_info.proto";
 
 option java_outer_classname = "TicketRequestProto";
 option java_multiple_files = true;
 option java_package = "ru.nspk.performance.api";
 
 message TicketRequest {
-  int32 requestId = 1;
-  string userUUID = 2;
+  int64 requestId = 1;
   string eventName = 3;
   string eventDate = 4;
-  google.protobuf.Timestamp timestamp = 5;
-  repeated ru.nspk.performance.base.PlaceCoordinate placeCoordinate = 6;
+  google.protobuf.Timestamp start = 5;
+  repeated ru.nspk.performance.base.TicketInfo ticketInfo = 6;
 }

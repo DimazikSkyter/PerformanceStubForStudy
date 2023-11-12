@@ -1,21 +1,28 @@
 package ru.study.stub.controller;
 
-import org.springframework.http.ResponseEntity;
-import ru.study.stub.dto.SeatsDto;
-import ru.study.stub.model.Event;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import ru.study.stub.dto.EventResponse;
+import ru.study.stub.dto.SeatResponse;
+import ru.study.stub.service.EventService;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
-public class EventController implements EventApi {
-    @Override
-    public ResponseEntity<List<Event>> eventsOfMerchantAndDate(String merchant, Date date) {
-        return null;
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/events")
+public class EventController {
+
+    private EventService eventService;
+
+    @GetMapping("/list")
+    public EventResponse eventsOfMerchantAndDate(@RequestParam String merchant,
+                                                 @RequestParam Date date) {
+        return eventService.getEventsByMerchantAndDate(merchant, date);
     }
 
-    @Override
-    public ResponseEntity<SeatsDto> seatsOfEvent(String eventName) {
-        return null;
+    @GetMapping("/{event_name}/seats")
+    public SeatResponse seatsOfEvent(@PathVariable("event_name") String eventName) {
+        return eventService.getSeatsFromEvent(eventName);
     }
 }

@@ -2,7 +2,7 @@ syntax = "proto3";
 package ru.nspk.performance.model;
 
 import "google/protobuf/timestamp.proto";
-import "ru/nspk/performance/base/place_coordinate.proto";
+import "ru/nspk/performance/base/ticket_info.proto";
 
 
 option java_multiple_files = true;
@@ -14,5 +14,5 @@ message Reserve {
   int32 serviceId = 2;
   int64 eventId = 3;
   string eventDate = 4;
-  repeated ru.nspk.performance.base.PlaceCoordinate placeCoordinate = 5;
+  repeated ru.nspk.performance.base.TicketInfo placeCoordinate = 5;
 }

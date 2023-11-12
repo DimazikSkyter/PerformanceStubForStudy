@@ -31,7 +31,7 @@ public class ReserveServiceWithTimeout implements ReserveService {
     private AtomicInteger reserveSequence = new AtomicInteger();
 
     @Override
-    public ReserveResponse reserve(String eventName, List<String> seats, long requestId) {
+    public ReserveResponse reserve(String eventName, List<String> seats, Long requestId) {
         log.debug("Make new reserve for event {} and seats {}", eventName, seats);
         try {
             Event event = Optional.ofNullable(eventService.getEvents().get(eventName)).orElseThrow(() -> new EventNotFound(eventName));
