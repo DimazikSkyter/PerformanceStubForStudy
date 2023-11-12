@@ -16,17 +16,17 @@ import scala.collection.immutable.Map
 class JdbcSimulation : Simulation() {
 
     private fun select(): QueryActionBuilder {
-        return jdbc("SELECT CITY")
-            .query("SELECT * FROM films.city where city_id = 2")
+        return jdbc("SELECT  purchase")
+            .query("SELECT * FROM theatre.purchase where id = 16")
             .check(
                 simpleCheck(simpleCheckType.NonEmpty),
                 allResults().saveAs("RR"))
     }
 
     var dataBase: JdbcProtocolBuilder = DB()
-        .url("jdbc:postgresql://localhost:5432/postgres")
+        .url("jdbc:postgresql://localhost:5435/postgres")
         .username("postgres")
-        .password("admin")
+        .password("postgres")
         .maximumPoolSize(23)
         .protocolBuilder()
 
@@ -34,7 +34,7 @@ class JdbcSimulation : Simulation() {
         .exec(select())
         .exec { s ->
             val row = mapAsJavaMapConverter(s.getList<Map<String, Any>>("RR")[0]).asJava()
-            println("RR:" + (row!!["city"]))
+            println("RR:" + (row!!["event"]))
             s
         }
 
