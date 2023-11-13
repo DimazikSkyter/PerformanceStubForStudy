@@ -15,9 +15,18 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
 
+    implementation("org.apache.kafka:kafka-clients:3.6.0")
+
+    implementation("org.apache.jmeter:ApacheJMeter_core:5.5") {
+        exclude("org.apache.jmeter", "bom")
+    }
+    implementation("org.apache.jmeter:ApacheJMeter_java:5.5"){
+        exclude("org.apache.jmeter", "bom")
+    }
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -25,8 +34,9 @@ dependencies {
 
 val fatJar = tasks.register<Jar>("uberJar") {
     archiveClassifier = "uber"
-
+    duplicatesStrategy = DuplicatesStrategy.WARN
     from(sourceSets.main.get().output)
+
 
     dependsOn(configurations.runtimeClasspath)
     from({
