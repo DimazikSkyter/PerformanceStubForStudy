@@ -23,7 +23,7 @@ public abstract class Action {
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-    protected long eventId;
+    protected String eventName;
 
     public byte[] getBytes() throws JsonProcessingException {
         return OBJECT_MAPPER.writeValueAsBytes(this);

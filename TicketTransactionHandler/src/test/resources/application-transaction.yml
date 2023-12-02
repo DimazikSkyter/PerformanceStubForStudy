@@ -1,0 +1,9 @@
+ticket:
+  transaction:
+    full-timeout-duration-ms: 1000
+    max-payment-time-ms: 50000
+    payment-link-timeout-ms: 3000
+    timeout-processor-threads: 1000
+logging:
+  level:
+    root: debug

@@ -8,6 +8,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import ru.nspk.performance.model.NewTransactionEvent;
 import ru.nspk.performance.transactionshandler.consumer.KafkaTransactionalConsumer;
 import ru.nspk.performance.transactionshandler.producer.KafkaProducer;
+import ru.nspk.performance.transactionshandler.properties.KafkaProperties;
 import ru.nspk.performance.transactionshandler.service.TransactionalEventService;
 
 @Configuration
@@ -20,7 +21,8 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaProducer kafkaProducer(KafkaTemplate<Long, byte[]> kafkaTemplate) {
-        return new KafkaProducer(kafkaTemplate);
+    public KafkaProducer kafkaProducer(KafkaTemplate<Long, byte[]> kafkaTemplate,
+                                       KafkaProperties kafkaProperties) {
+        return new KafkaProducer(kafkaTemplate, kafkaProperties);
     }
 }

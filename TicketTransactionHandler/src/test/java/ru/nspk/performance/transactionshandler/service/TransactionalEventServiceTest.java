@@ -1,16 +1,20 @@
 package ru.nspk.performance.transactionshandler.service;
 
-import com.google.protobuf.Timestamp;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.nspk.performance.api.TicketRequest;
-import ru.nspk.performance.base.PlaceCoordinate;
-import ru.nspk.performance.transactionshandler.keyvaluestorage.KeyValueStorage;
+import ru.nspk.performance.base.TicketInfo;
+import ru.nspk.performance.keyvaluestorage.KeyValueStorage;
+import ru.nspk.performance.transactionshandler.model.Seat;
 import ru.nspk.performance.transactionshandler.model.theatrecontract.Event;
 import ru.nspk.performance.transactionshandler.producer.KafkaProducer;
 import ru.nspk.performance.transactionshandler.properties.TransactionProperties;
@@ -21,58 +25,60 @@ import ru.nspk.performance.transactionshandler.timeoutprocessor.TimeoutProcessor
 import ru.nspk.performance.transactionshandler.transformer.TransformerMultiton;
 import ru.nspk.performance.transactionshandler.validator.ValidatorMultiton;
 
+import java.sql.Date;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
+
+//todo Сейчас ЗДЕСЬ
 @Slf4j
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = {TransactionalEventService.class, TransactionalEventServiceTest.TransactionEventServiceTestConfig.class})
+@ExtendWith(SpringExtension.class)
+@EnableConfigurationProperties
 class TransactionalEventServiceTest {
 
-    @Mock
+    @MockBean
     private KafkaProducer kafkaProducer;
 
-    @Mock
+    @MockBean
     private ValidatorMultiton validators;
-    @Mock
+    @MockBean
     private TheatreClient theatreClient;
-    @Mock
+    @MockBean
     private TransformerMultiton transformers;
-    @Mock
+    @MockBean
     private KeyValueStorage keyValueStorage;
-    @Mock
+    @MockBean
     private TimeoutProcessor timeoutProcessor;
-    @Mock
+    @MockBean
     private TransactionProperties transactionProperties;
-    @Mock
+    @MockBean
     private PaymentService paymentService;
 
-    @InjectMocks
+    @Autowired
     private TransactionalEventService transactionalEventService;
 
     @Test
-    void shouldPositiveHandleNewTicketEvent() {
+    void shouldPositiveHandleNewTicketEvent() throws InterruptedException, ParseException {
         log.info("Start new ticket event test");
         TicketRequest ticketRequest = TicketRequest.newBuilder()
                 .setRequestId(311)
                 .setEventDate("2023-11-01")
                 .setEventName("Rock-roll")
-                .addPlaceCoordinate(PlaceCoordinate.newBuilder()
-                        .setRow(3)
-                        .setPlace(11)
-                        .build())
-                .addPlaceCoordinate(PlaceCoordinate.newBuilder()
-                        .setRow(3)
-                        .setPlace(12)
-                        .build())
-                .setTimestamp(Timestamp.newBuilder()
-                        .setSeconds(Instant.now().getEpochSecond())
+                .addTicketInfo(TicketInfo.newBuilder()
+                        .setPrice(33.2F)
+                        .setPlace("4A")
+                        .setUserUUID("user-1")
                         .build())
                 .build();
         TicketTransactionState ticketTransactionState = TicketTransactionState
                 .builder()
                 .transactionId(55555L)
-                .event(new Event(Instant.now(), "Rock-roll", List.of(
-                        "3:11", "3:12"
+                .event(new Event(Date.from(Instant.now()), "Rock-roll", List.of(
+                        new Seat("3:11", 3.11, "asdsad"), new Seat("3:12", 3.12, "bbxc")
                 )))
                 .currentState(TransactionState.NEW_TRANSACTION)
                 .build();
@@ -82,23 +88,13 @@ class TransactionalEventServiceTest {
         transactionalEventService.newTicketEvent(ticketRequest);
     }
 
-    @Test
-    void handleReserveResponse() {
-    }
+    @TestConfiguration
+    public static class TransactionEventServiceTestConfig {
 
-    @Test
-    void handlePaymentResponse() {
-    }
-
-    @Test
-    void handleReversePayment() {
-    }
-
-    @Test
-    void rejectTransaction() {
-    }
-
-    @Test
-    void makeReserve() {
+        @Bean
+        public TimeoutProcessor timeoutProcessor(TransactionProperties transactionProperties) {
+            ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(transactionProperties.getTimeoutProcessorThreads());
+            return new TimeoutProcessor(scheduledExecutorService);
+        }
     }
 }

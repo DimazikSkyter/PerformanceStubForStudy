@@ -16,7 +16,7 @@ public class ValidatorMultiton {
         inputValidators.get(cls).validateInput(model);
     }
 
-    public void validateModel(@NonNull Object model) {
+    public void validateModel(@NonNull Object model) throws InterruptedException {
         modelValidators.get(model.getClass()).validateModel(model);
     }
 }

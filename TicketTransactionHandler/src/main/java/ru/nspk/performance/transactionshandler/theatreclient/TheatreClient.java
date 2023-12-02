@@ -20,8 +20,8 @@ public interface TheatreClient {
     Set<String> seats(String event) throws ExecutionException, InterruptedException, TimeoutException;
 
     void reserve(String requestId,
-                            long event,
-                            List<String> seats,
+                            String event,
+                            String seats,
                             Consumer<String> callback) throws ExecutionException, InterruptedException, TimeoutException;
 
     void release(long reserveId);

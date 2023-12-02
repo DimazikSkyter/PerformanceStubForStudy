@@ -1,7 +1,8 @@
 {
 	"event1": {
 		"name" : "рок концерт 1",
-		"eventDate" : "2023-10-01",
+		"type" : "рок фестиваль",
+		"eventDate" : "2024-10-01",
 		"seats": {
 			"1A": {
 				"seatStatus" : "FREE",
@@ -48,7 +49,8 @@
 	},
 	"event2": {
 		"name" : "оркестр 123",
-		"eventDate" : "2023-10-01",
+		"type" : "рок фестиваль",
+		"eventDate" : "2024-10-01",
 		"seats": {
 			"1A": {
 				"seatStatus" : "FREE",

@@ -1,8 +1,11 @@
 pluginManagement {
     val kotlinVersion: String by settings
+    val springVersion: String by settings
+
     plugins {
         kotlin("jvm") version kotlinVersion
         kotlin("plugin.allopen") version kotlinVersion
+        id("org.springframework.boot") version springVersion
     }
     repositories {
         maven { url = uri("https://plugins.gradle.org/m2/") }

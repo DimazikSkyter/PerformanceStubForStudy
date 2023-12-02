@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 public class InMemoryProperties {
 
     private String charset;
-    private long timeoutMs;
+    private long timeout;
+    private long timeToLive;
     private String address;
     private long lockTimeoutMs;
 }

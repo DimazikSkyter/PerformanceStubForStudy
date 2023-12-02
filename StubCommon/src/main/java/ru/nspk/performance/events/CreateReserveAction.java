@@ -14,5 +14,5 @@ import java.util.List;
 @Jacksonized
 public class CreateReserveAction extends Action {
 
-    private final List<String> seats;
+    private final String seats;
 }

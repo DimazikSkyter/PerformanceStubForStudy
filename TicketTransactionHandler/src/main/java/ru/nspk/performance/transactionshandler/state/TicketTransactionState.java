@@ -4,16 +4,22 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hazelcast.nio.serialization.Portable;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
 import lombok.Builder;
 import lombok.Data;
 import ru.nspk.performance.events.Action;
 import ru.nspk.performance.transactionshandler.model.theatrecontract.Event;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
+
+//todo перенести в common
 @Builder
 @Data
 public class TicketTransactionState implements TicketFlow, Serializable {
@@ -56,6 +62,10 @@ public class TicketTransactionState implements TicketFlow, Serializable {
         this.errorReason = errorReason;
         this.start = start;
         this.event = event;
+    }
+
+    public static TicketTransactionState from(byte[] bytes) throws IOException {
+        return OBJECT_MAPPER.readValue(bytes, TicketTransactionState.class);
     }
 
     public byte[] getBytes() throws JsonProcessingException {

@@ -42,13 +42,16 @@ services:
     command: |
       "
       # blocks until kafka is reachable
-      kafka-topics --zookeeper zg_core_kafka:2181 --list
+      kafka-topics --zookeeper zookeeper:2181 --list
 
       echo -e 'Creating kafka topics'
-      kafka-topics --zookeeper zg_core_kafka:2181 --create --if-not-exists --topic new_transaction_requests --replication-factor 1 --partitions 1
+      kafka-topics --zookeeper zookeeper:2181 --create --if-not-exists --topic new_transaction_requests --replication-factor 1 --partitions 1
+      kafka-topics --zookeeper zookeeper:2181 --create --if-not-exists --topic ticket_request --replication-factor 1 --partitions 1
+      kafka-topics --zookeeper zookeeper:2181 --create --if-not-exists --topic transaction_state --replication-factor 1 --partitions 1
+      kafka-topics --zookeeper zookeeper:2181 --create --if-not-exists --topic events --replication-factor 1 --partitions 1
 
       echo -e 'Successfully created the following topics:'
-      kafka-topics --zookeeper zg_core_kafka:2181 --list
+      kafka-topics --zookeeper zookeeper:2181 --list
       "
 
   schemaregistry:

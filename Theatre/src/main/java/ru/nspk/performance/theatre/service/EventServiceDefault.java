@@ -61,7 +61,7 @@ public class EventServiceDefault implements EventService {
                 .date(event.getEventDate())
                 .type(event.getType())
                 .merchant(event.getMerchant())
-                .name(event.getName())
+                .title(event.getName())
                 .exists(true)
                 .build();
     }

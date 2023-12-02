@@ -10,10 +10,11 @@ import ru.nspk.performance.api.TicketRequest;
 import ru.nspk.performance.events.CreateReserveAction;
 import ru.nspk.performance.events.PaymentAction;
 import ru.nspk.performance.events.ReserveResponseAction;
-import ru.nspk.performance.transactionshandler.keyvaluestorage.KeyValueStorage;
+import ru.nspk.performance.keyvaluestorage.KeyValueStorage;
 import ru.nspk.performance.transactionshandler.model.PaymentCheckResponse;
 import ru.nspk.performance.transactionshandler.model.PaymentRequest;
 import ru.nspk.performance.transactionshandler.model.ReversePaymentResponse;
+import ru.nspk.performance.transactionshandler.model.Seat;
 import ru.nspk.performance.transactionshandler.producer.KafkaProducer;
 import ru.nspk.performance.transactionshandler.properties.TransactionProperties;
 import ru.nspk.performance.transactionshandler.state.TicketTransactionState;
@@ -25,6 +26,7 @@ import ru.nspk.performance.transactionshandler.transformer.TransformerMultiton;
 import ru.nspk.performance.transactionshandler.validator.ValidationException;
 import ru.nspk.performance.transactionshandler.validator.ValidatorMultiton;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
@@ -40,7 +42,7 @@ public class TransactionalEventService {
 
     //todo вынести список мап в корень
     public static final String TRANSACTIONS_MAP = "transactions";
-    public static final String USERS_MAP = "users";
+    public static final String PERSON_DATA_MAP = "person_data";
     public static final String REQUESTS_MAP = "requests";
     public static final String EVENTS_MAP = "events";
 
@@ -56,6 +58,8 @@ public class TransactionalEventService {
 
     @Transactional
     public void newTicketEvent(TicketRequest ticketRequest) {
+        long transactionId = -1;
+        log.info("Create new ticket request\n{}", ticketRequest);
         try {
             Instant start = Instant.now();
             validators.validateModel(ticketRequest);
@@ -63,29 +67,28 @@ public class TransactionalEventService {
             ticketTransactionState.setStart(start);
 
             timeoutProcessor.executeWithTimeout(
-                    () -> {
-                        try {
-                            kafkaProducer.sendTransactionState(ticketTransactionState);
-                            keyValueStorage.put(TRANSACTIONS_MAP,
-                                    ticketTransactionState.getTransactionId(),
-                                    ticketTransactionState,
-                                    bytes -> makeReserve(ticketTransactionState));
-                        } catch (UnsupportedEncodingException | JsonProcessingException e) {
-                            log.error("Catch exception while save transaction {} into IMDG.", ticketTransactionState.getTransactionId());
-                        }
-                    },
                     Duration.of(transactionProperties.getFullTimeoutDurationMs() - Duration.between(start, Instant.now()).toMillis(), ChronoUnit.MILLIS),
                     () -> rejectTransaction(ticketTransactionState.getTransactionId(), "Timeout exception"));
+
+            transactionId = ticketTransactionState.getTransactionId();
+            kafkaProducer.sendTransactionState(transactionId, ticketTransactionState.getBytes());
+            keyValueStorage.put(TRANSACTIONS_MAP,
+                    transactionId,
+                    ticketTransactionState.getBytes(),
+                    bytes -> makeReserve(ticketTransactionState));
+        } catch (UnsupportedEncodingException | JsonProcessingException e) {
+            log.error("Catch exception while save transaction {} into IMDG.", transactionId);
         } catch (ValidationException validationException) {
             log.error("Get exception on validation ticket {} on new event.", ticketRequest.getEventName(), validationException);
         } catch (TransformException transformException) {
             log.error("Failed to transform transaction {}", ticketRequest.getEventName(), transformException);
         } catch (Exception e) {
-            log.error("Get unknown error in new transaction event {}", ticketRequest.getRequestId());
+            log.error("Get unknown error in new transaction event {}", ticketRequest.getRequestId(), e);
         }
     }
 
     public void handleReserveResponse(String reserveResponseBody) {
+        log.debug("New income reserve response body {}", reserveResponseBody);
         try {
             validators.validateInput(reserveResponseBody, ReserveResponseAction.class);
             ReserveResponseAction reserveResponseEvent = transformers.transform(reserveResponseBody);
@@ -106,8 +109,8 @@ public class TransactionalEventService {
     }
 
     private void createPaymentWithTimeout(ReserveResponseAction reserveResponseEvent, long transactionId) {
+        makePayment(reserveResponseEvent, transactionId);
         timeoutProcessor.executeWithTimeout(
-                () -> makePayment(reserveResponseEvent, transactionId),
                 calculateTimeout(reserveResponseEvent.finishTime(),
                         Duration.of(transactionProperties.getMaxPaymentTimeMs(), ChronoUnit.MILLIS),
                         transactionId),
@@ -147,9 +150,14 @@ public class TransactionalEventService {
     }
 
     private void changeStatusToWaitingForPayment(PaymentRequest paymentRequest) {
-        keyValueStorage.updateWithCondition(TRANSACTIONS_MAP, paymentRequest.transactionId(), (TicketTransactionState currentTransactionState) -> currentTransactionState, ticketTransactionState -> TransactionState.WAIT_FOR_PAYMENT.equals(ticketTransactionState.getCurrentState()));
+        keyValueStorage.updateWithCondition(TRANSACTIONS_MAP,
+                paymentRequest.transactionId(),
+                (TicketTransactionState currentTransactionState) -> currentTransactionState,
+                ticketTransactionState -> TransactionState.WAIT_FOR_PAYMENT.equals(ticketTransactionState.getCurrentState()));
     }
 
+    //todo payment response не обработан
+    //Делается подпиской на пейментсервисе, и переводе статуса.
     public void handlePaymentResponse(String request) {
 
         Long transactionId = null;
@@ -201,13 +209,25 @@ public class TransactionalEventService {
 
     public void rejectTransaction(long transactionId, String reason) { //перевести reason в enum
         try {
-            Tuple2<Boolean, TicketTransactionState> transactionStatusTuple = keyValueStorage.<Long, TicketTransactionState>updateWithCondition(TRANSACTIONS_MAP, transactionId, ticketTransactionState -> {
-                ticketTransactionState.setCurrentState(TransactionState.REJECT);
-                ticketTransactionState.setErrorReason(reason);
-                return ticketTransactionState;
-            }, ticketTransactionState -> !TransactionState.REJECT.equals(ticketTransactionState.getCurrentState()));
+            Tuple2<Boolean, byte[]> transactionStatusTuple = keyValueStorage.<Long, byte[]>updateWithCondition(TRANSACTIONS_MAP, transactionId, bytes -> {
+                TicketTransactionState ticketTransactionState = null;
+                try {
+                    ticketTransactionState = TicketTransactionState.from(bytes);
+                    ticketTransactionState.setCurrentState(TransactionState.REJECT);
+                    ticketTransactionState.setErrorReason(reason);
+                    return ticketTransactionState.getBytes();
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to reject transaction " + transactionId, e);
+                }
+            }, bytes -> {
+                try {
+                    return !TransactionState.REJECT.equals(TicketTransactionState.from(bytes).getCurrentState());
+                } catch (IOException e) {
+                    return  false;
+                }
+            });
             if (transactionStatusTuple.getKey()) {
-                kafkaProducer.sendTransactionState(transactionStatusTuple.getValue());
+                kafkaProducer.sendTransactionState(transactionId, transactionStatusTuple.getValue());
             }
         } catch (Exception e) {
             log.error("Failed to reject transaction {}.", transactionId, e);
@@ -215,9 +235,11 @@ public class TransactionalEventService {
     }
 
     public void makeReserve(TicketTransactionState ticketTransactionState) {
+        log.debug("Create new reserve for ticket transaction state {}", ticketTransactionState);
         CreateReserveAction createReserveEvent = CreateReserveAction.builder()
-                .seats((ticketTransactionState.getEvent().getSeats()))
-                .build(); //todo поправить eventId
+                .seats((ticketTransactionState.getEvent().getSeats().stream().map(Seat::place).reduce((s, s2) -> s + "," + s2).orElseThrow(RuntimeException::new)))
+                .eventName(ticketTransactionState.getEvent().getEventName())
+                .build();
         String requestId = UUID.randomUUID().toString();
         try {
             keyValueStorage.put(REQUESTS_MAP, requestId, ticketTransactionState.getTransactionId(),
@@ -231,15 +253,30 @@ public class TransactionalEventService {
     }
 
     private void makeReserveToTheatre(String requestId, TicketTransactionState transactionState, CreateReserveAction createReserveEvent) {
+        log.debug("Make reserve to theatre with request id {}", requestId);
         try {
-            theatreClient.reserve(requestId, createReserveEvent.getEventId(), createReserveEvent.getSeats(), this::handleReserveResponse);
+            theatreClient.reserve(requestId, createReserveEvent.getEventName(), createReserveEvent.getSeats(), this::handleReserveResponse);
             transactionState.getActions().put("create reserve", createReserveEvent);
             transactionState.moveOnNextStep(TransactionState.NEW_TRANSACTION);
             kafkaProducer.sendEvent(transactionState.getTransactionId(), createReserveEvent.getBytes());
-            keyValueStorage.<Long, TicketTransactionState>updateWithCondition(TRANSACTIONS_MAP,
+            keyValueStorage.<Long, byte[]>updateWithCondition(TRANSACTIONS_MAP,
                     transactionState.getTransactionId(),
-                    ts -> transactionState,
-                    inMemoryTransactionState -> inMemoryTransactionState.getCurrentState().isEarliestThan(transactionState.getCurrentState()));
+                    bytes -> {
+                        try {
+                            return transactionState.getBytes();
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException("Failed to update transaction state", e);
+                        }
+                    },
+                    inMemoryTransactionStateBytes -> {
+                        try {
+                            TicketTransactionState ticketTransactionState = TicketTransactionState.from(inMemoryTransactionStateBytes);
+                            return ticketTransactionState.getCurrentState().isEarliestThan(transactionState.getCurrentState());
+                        } catch (IOException e) {
+                            return false;
+                        }
+                    }
+            );
         } catch (TimeoutException e) {
             log.error("Failed to get reserve response for transaction {} during wait time", transactionState.getTransactionId());
             //todo реджекта нет, потому что клиент потом вынесется в отдельный модуль и в этом отпадет смысл

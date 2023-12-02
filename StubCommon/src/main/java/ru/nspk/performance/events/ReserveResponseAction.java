@@ -17,6 +17,11 @@ public class ReserveResponseAction extends Action {
     private Instant reserveStarted;
     private String reserveDuration = "PT5M";
 
+    public ReserveResponseAction(ActionBuilder<?, ?> b, Long reserveId) {
+        super(b);
+        this.reserveId = reserveId;
+    }
+
     public Instant finishTime() {
         Duration timeToPay = Duration.parse(reserveDuration);
         return reserveStarted.plus(timeToPay);
