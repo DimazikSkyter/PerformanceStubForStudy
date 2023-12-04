@@ -6,11 +6,14 @@ import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.nspk.performance.theatre.dto.PurchaseResponse;
+import ru.nspk.performance.transactionshandler.properties.TheatreClientProperties;
 
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -22,11 +25,13 @@ import java.util.function.Consumer;
 public class TheatreClientImpl implements TheatreClient {
 
     private final WebClient client;
+    private final TheatreClientProperties theatreClientProperties;
 
-    public TheatreClientImpl(String theatreBaseUrl) {
+    public TheatreClientImpl(String theatreBaseUrl, TheatreClientProperties theatreClientProperties) {
         client = WebClient.builder().baseUrl(theatreBaseUrl).clientConnector(
                 new JettyClientHttpConnector(new HttpClient(new HttpClientTransportOverHTTP()))
         ).build();
+        this.theatreClientProperties = theatreClientProperties;
     }
 
     @Override
@@ -36,7 +41,7 @@ public class TheatreClientImpl implements TheatreClient {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Set<String>>() {})
                 .toFuture()
-                .get(1, TimeUnit.MILLISECONDS);
+                .get(theatreClientProperties.getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -46,21 +51,24 @@ public class TheatreClientImpl implements TheatreClient {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Set<String>>() {})
                 .toFuture()
-                .get(1, TimeUnit.MILLISECONDS);
+                .get(theatreClientProperties.getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public void reserve(String requestId, long event, List<String> seats, Consumer<String> callback) throws ExecutionException, InterruptedException, TimeoutException {
+    public void reserve(String requestId, String event, String seats, Consumer<String> callback) {
+        log.debug("Calling theatre client with request id {}", requestId);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("event", event);
+        body.add("seat", seats);
         client.post()
-                .uri(uriBuilder -> uriBuilder.path("/theatre/reserve")
-                        .queryParam("event", event)
-                        .queryParam("seat", String.join(",", seats)).build())
+                .uri(uriBuilder -> uriBuilder.path("/theatre/reserve").build())
                 .header("REQUEST_ID", requestId)
+                .body(BodyInserters.fromFormData(body))
                 .retrieve()
                 .bodyToMono(String.class)
                 .toFuture()
                 .thenAccept(callback)
-                .orTimeout(1, TimeUnit.MILLISECONDS);
+                .orTimeout(theatreClientProperties.getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -86,6 +94,6 @@ public class TheatreClientImpl implements TheatreClient {
                 .retrieve()
                 .bodyToMono(PurchaseResponse.class)
                 .toFuture()
-                .get(1, TimeUnit.MILLISECONDS);
+                .get(theatreClientProperties.getPurchaseTimeout(), TimeUnit.MILLISECONDS);
     }
 }

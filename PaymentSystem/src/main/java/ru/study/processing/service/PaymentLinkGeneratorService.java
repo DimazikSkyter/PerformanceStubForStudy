@@ -2,9 +2,9 @@ package ru.study.processing.service;
 
 
 import ru.study.processing.dto.PaymentDetailsDto;
-import ru.study.processing.model.PaymentLink;
+import ru.study.processing.dto.PaymentLinkResponse;
 
 public interface PaymentLinkGeneratorService {
 
-    PaymentLink generate(PaymentDetailsDto paymentDetailsDto);
+    PaymentLinkResponse generate(String requestId, PaymentDetailsDto paymentDetailsDto);
 }

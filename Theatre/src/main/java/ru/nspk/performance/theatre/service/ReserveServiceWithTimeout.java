@@ -12,10 +12,7 @@ import ru.nspk.performance.theatre.model.Seat;
 import ru.nspk.performance.theatre.model.SeatStatus;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -25,14 +22,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReserveServiceWithTimeout implements ReserveService {
 
+    private final Random random = new Random();
     private final ReserveCache reserveCache;
     private final EventService eventService;
 
     private AtomicInteger reserveSequence = new AtomicInteger();
 
     @Override
-    public ReserveResponse reserve(String eventName, List<String> seats, Long requestId) {
+    public ReserveResponse reserve(String eventName, List<String> seats, String requestId) {
         log.debug("Make new reserve for event {} and seats {}", eventName, seats);
+        randomWait(); //todo ответ слишком быстрый, ticketTransactionResponse пока к этому не готов
         try {
             Event event = Optional.ofNullable(eventService.getEvents().get(eventName)).orElseThrow(() -> new EventNotFound(eventName));
 
@@ -56,6 +55,7 @@ public class ReserveServiceWithTimeout implements ReserveService {
                             .nonFreeSeats(Set.of())
                             .reserveStarted(Instant.now())
                             .requestId(requestId)
+                            .totalAmount(sum.get())
                             .build();
                 }
                 return ReserveResponse.builder()
@@ -78,6 +78,14 @@ public class ReserveServiceWithTimeout implements ReserveService {
                     .requestId(requestId)
                     .errorMessage("Failed to make reserve")
                     .build();
+        }
+    }
+
+    private void randomWait() {
+        try {
+            Thread.sleep(1000L + random.nextLong(2000));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

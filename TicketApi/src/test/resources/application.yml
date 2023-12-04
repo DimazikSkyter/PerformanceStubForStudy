@@ -1,0 +1,21 @@
+
+kafka:
+  partitions:
+  int:
+  name:
+spring:
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      group_id: group-id
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+in-memory:
+  address: "localhost:5701"
+  timeout: 150
+  charset: UTF-8
+  lock-timeout-ms: 250
+  time-to-live: 10000000

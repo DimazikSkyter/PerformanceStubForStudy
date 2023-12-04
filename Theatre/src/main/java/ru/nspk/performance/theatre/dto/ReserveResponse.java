@@ -11,17 +11,18 @@ import java.time.Instant;
 import java.util.Set;
 
 @Data
-@Builder()
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReserveResponse {
 
     private long reserveId;
-    private Long requestId;
+    private String requestId;
     private Instant reserveStarted;
     private Set<String> nonFreeSeats;
     @Builder.Default
     private String reserveDuration = "PT5M";
     private String errorMessage;
+    private double totalAmount;
 }

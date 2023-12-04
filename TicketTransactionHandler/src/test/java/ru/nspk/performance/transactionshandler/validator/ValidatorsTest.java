@@ -31,7 +31,7 @@ class ValidatorsTest {
                 .readAllBytes());
         log.info("Income positive payment response '{}'", paymentResponse);
 
-        InputValidator inputValidator = new PaymentCheckResponseInputValidator(paymentCheckResponsePatterns);
+        InputValidator inputValidator = new InputValidator(paymentCheckResponsePatterns);
 
         Assertions.assertDoesNotThrow(() -> inputValidator.validateInput(paymentResponse));
     }
@@ -44,7 +44,7 @@ class ValidatorsTest {
                 .readAllBytes());
         log.info("Income negative payment response '{}'", paymentResponse);
 
-        InputValidator inputValidator = new PaymentCheckResponseInputValidator(paymentCheckResponsePatterns);
+        InputValidator inputValidator = new InputValidator(paymentCheckResponsePatterns);
         Assertions.assertThrows(ValidationException.class, () -> inputValidator.validateInput(paymentResponse));
     }
 
@@ -56,7 +56,7 @@ class ValidatorsTest {
                 .readAllBytes());
         log.info("Income positive reserve response '{}'", reserveResponseEvent);
 
-        InputValidator inputValidator = new ReserveResponseEventInputValidator(reserveResponseActionPatterns);
+        InputValidator inputValidator = new InputValidator(reserveResponseActionPatterns);
 
         Assertions.assertDoesNotThrow(() -> inputValidator.validateInput(reserveResponseEvent));
     }
@@ -69,7 +69,7 @@ class ValidatorsTest {
                 .readAllBytes());
         log.info("Income negative reserve response '{}'", reserveResponseEvent);
 
-        InputValidator inputValidator = new ReserveResponseEventInputValidator(reserveResponseActionPatterns);
+        InputValidator inputValidator = new InputValidator(reserveResponseActionPatterns);
 
         Assertions.assertThrows(ValidationException.class, () -> inputValidator.validateInput(reserveResponseEvent));
     }

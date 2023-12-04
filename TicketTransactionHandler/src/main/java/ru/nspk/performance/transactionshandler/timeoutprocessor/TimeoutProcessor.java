@@ -11,8 +11,7 @@ public class TimeoutProcessor {
 
     private final ScheduledExecutorService executorService;
 
-    public void executeWithTimeout(Runnable runnable, Duration timeout, Runnable runnableAfterTimeout) {
-        executorService.execute(runnable);
+    public void executeWithTimeout(Duration timeout, Runnable runnableAfterTimeout) {
         executorService.schedule(runnableAfterTimeout, timeout.toMillis(), TimeUnit.MILLISECONDS);
     }
 }

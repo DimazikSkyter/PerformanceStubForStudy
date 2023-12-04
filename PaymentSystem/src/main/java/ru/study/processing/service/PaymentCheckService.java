@@ -1,9 +1,9 @@
 package ru.study.processing.service;
 
 import ru.study.processing.dto.PaymentOrderDto;
-import ru.study.processing.model.PaymentOrderResponse;
+import ru.study.processing.dto.PaymentOrderResponse;
 
 public interface PaymentCheckService {
 
-    PaymentOrderResponse checkPayment(PaymentOrderDto paymentOrderDto);
+    PaymentOrderResponse pay(PaymentOrderDto paymentOrderDto);
 }

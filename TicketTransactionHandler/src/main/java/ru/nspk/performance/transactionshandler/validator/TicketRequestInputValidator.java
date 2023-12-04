@@ -1,12 +1,13 @@
 package ru.nspk.performance.transactionshandler.validator;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.nspk.performance.api.TicketRequest;
-import ru.nspk.performance.transactionshandler.keyvaluestorage.KeyValueStorage;
+import ru.nspk.performance.base.TicketInfo;
+import ru.nspk.performance.keyvaluestorage.KeyValueStorage;
+import ru.nspk.performance.keyvaluestorage.model.Person;
 import ru.nspk.performance.transactionshandler.service.TransactionalEventService;
 import ru.nspk.performance.transactionshandler.theatreclient.TheatreClient;
 import ru.nspk.performance.users.User;
@@ -17,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -29,10 +31,10 @@ public class TicketRequestInputValidator implements ModelValidator<TicketRequest
     private final TheatreClient theatreClient;
 
     @Override
-    public void validateModel(@NonNull TicketRequest model) {
+    public void validateModel(@NonNull TicketRequest model) throws InterruptedException {
         deduplicate(model.getRequestId());
-        checkUserExistsAndEnable(model.getUserUUID());
-        checkEvent(model.getEventName());
+        checkUserExistsAndEnable(model.getTicketInfoList());
+        //checkEvent(model.getEventName()); todo не реализовано пока
         checkEventDate(model.getEventDate());
     }
 
@@ -53,7 +55,7 @@ public class TicketRequestInputValidator implements ModelValidator<TicketRequest
         }
     }
 
-    private void checkEvent(String eventName) {
+    private void checkEvent(String eventName) throws InterruptedException {
         try {
             String event = Optional.ofNullable(keyValueStorage.<String, String>get(TransactionalEventService.EVENTS_MAP, eventName))
                     .orElse(
@@ -63,7 +65,6 @@ public class TicketRequestInputValidator implements ModelValidator<TicketRequest
         } catch (JsonProcessingException |
                  UnsupportedEncodingException |
                  ExecutionException |
-                 InterruptedException |
                  TimeoutException e) {
             log.error("Event check event {} in in-memory.", eventName, e);
         }
@@ -78,30 +79,32 @@ public class TicketRequestInputValidator implements ModelValidator<TicketRequest
         );
     }
 
-    private void checkUserExistsAndEnable(String userUuid) {
-        try {
-            User user = keyValueStorage.<String, User>get(TransactionalEventService.USERS_MAP, userUuid);
-            if (user == null) {
-                throw new ValidationException(
-                        "User " + userUuid + " not found. Need to register",
-                        this.getClass().getName(),
-                        ValidationError.USER_NOT_FOUND);
+    private void checkUserExistsAndEnable(List<TicketInfo> ticketInfoList) throws InterruptedException {
+        for (TicketInfo ticketInfo: ticketInfoList) {
+            try {
+                Person person = keyValueStorage.<String, Person>get(TransactionalEventService.PERSON_DATA_MAP, ticketInfo.getUserUUID());
+                if (person == null) {
+                    throw new ValidationException(
+                            "Person " + ticketInfo.getUserUUID() + " not found. Need to register",
+                            this.getClass().getName(),
+                            ValidationError.USER_NOT_FOUND);
+                }
+            } catch (ExecutionException | TimeoutException e) {
+                log.error("Failed to check user {} in in-memory.", ticketInfo.getUserUUID(), e);
             }
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
-            log.error("Failed to check user {} in in-memory.", userUuid, e);
         }
     }
 
-    private void deduplicate(long requestId) {
+    private void deduplicate(long requestId) throws InterruptedException {
         try {
             Long transactionId = keyValueStorage.<Long, Long>get(TransactionalEventService.REQUESTS_MAP, requestId);
-            if (transactionId == Long.MIN_VALUE) {
+            if (transactionId != null && transactionId == Long.MIN_VALUE) {
                 throw new ValidationException(
                         "Duplicate of ticket request with id " + requestId + ". Stop handling request.",
                         this.getClass().getName(),
                         ValidationError.DUPLICATE);
             }
-        } catch (ExecutionException | InterruptedException | TimeoutException e) {
+        } catch (ExecutionException | TimeoutException e) {
             log.error("Failed to check deduplicate request with id {}", requestId, e);
         }
     }

@@ -9,10 +9,11 @@ public enum TransactionState {
 
     RESERVE_REQUEST(1),
     RESERVED(2),
-    WAIT_FOR_PAYMENT(3),
-    WAIT_MERCHANT_APPROVE(4),
-    COMPLETE(5),
-    REJECT(5);
+    WAIT_FOR_PAYMENT_LINK(3),
+    PAYMENT_LINK_CREATED(4),
+    WAIT_FOR_PAYMENT(5),
+    COMPLETE(6),
+    REJECT(6);
 
     @Getter
     private final int stage;

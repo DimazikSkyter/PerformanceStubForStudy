@@ -1,14 +1,14 @@
 package ru.nspk.performance.transactionshandler.model.theatrecontract;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.jackson.Jacksonized;
+import ru.nspk.performance.transactionshandler.model.Seat;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -18,7 +18,8 @@ import java.util.List;
 @Jacksonized
 public class Event {
 
-    private Instant eventDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private Date eventDate;
     private String eventName;
-    private List<String> seats;
+    private List<Seat> seats;
 }

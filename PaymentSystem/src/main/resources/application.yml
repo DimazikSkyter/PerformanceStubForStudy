@@ -1,0 +1,10 @@
+ticket:
+  client:
+    full-url: "http://localhost:8085/payment/update_status"
+    connect-timeout: "PT0.2S"
+    read-timeout: "PT0.5S"
+server:
+  port: 8087
+management:
+  server:
+    port: 8088

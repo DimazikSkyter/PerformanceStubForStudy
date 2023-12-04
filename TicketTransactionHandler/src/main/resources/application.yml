@@ -1,9 +1,50 @@
+spring:
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      auto-offset-reset: earliest
+      group_id: transaction_service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
 payment-service:
   instance-key: 1
   payment-service-base-address: "http://localhost:9401"
   payment-service-path: /processing/payment/paymentLink
 in-memory:
   address: "localhost:5701"
+  timeout: 500
+  charset: UTF-8
+  lock-timeout-ms: 500
+  time-to-live: 100000000
 management:
   server:
-    port: 9080
+    port: 8086
+logging:
+  level:
+    ru:
+      nspk: debug
+    root: info
+server:
+  port: 8085
+kafka:
+  event-topic: events
+  bootstrap-address: localhost:9092
+  transaction-state-topic: transaction_state
+  payment-link-topic: payment_link
+ticket:
+  transaction:
+    full-timeout-duration-ms: 30000
+environment:
+  theatre-base-url: "http://localhost:8083"
+  payment-service-base-url: "http://localhost:8087"
+theatre:
+  client:
+    purchase-timeout: 1000
+    timeout: 3000
+payment:
+  client:
+    timeout: 300

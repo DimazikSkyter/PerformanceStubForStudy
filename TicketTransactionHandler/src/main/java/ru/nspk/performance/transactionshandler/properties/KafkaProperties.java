@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
 @Builder
 public class KafkaProperties {
 
+    //not used
     private String bootstrapAddress;
     private String eventTopic;
     private String transactionStateTopic;
+    private String paymentLinkTopic;
 }

@@ -4,5 +4,5 @@ import lombok.NonNull;
 
 public interface ModelValidator <M>{
 
-    void validateModel(@NonNull M model);
+    void validateModel(@NonNull M model) throws InterruptedException;
 }

@@ -35,8 +35,13 @@ public class TheatreController {
         return eventService.seats(event);
     }
 
+    @PutMapping("/new_event")
+    public EventDto addNewEvent(@RequestBody CreateEventRequest createEventRequest) {
+        return eventService.createNewEvent(createEventRequest);
+    }
+
     @PostMapping("/reserve")
-    public ReserveResponse reserve(@RequestParam(name = "event") String event, @RequestParam(name = "seat") List<String> seats, @RequestHeader(name = "XREQUEST_ID", required = false) Long requestId) {
+    public ReserveResponse reserve(@RequestParam(name = "event") String event, @RequestParam(name = "seat") List<String> seats, @RequestHeader(name = "REQUEST_ID", required = false) String requestId) {
         return reserveService.reserve(event, seats, requestId);
     }
 

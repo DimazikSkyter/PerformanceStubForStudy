@@ -1,9 +1,12 @@
 events:
   path: Theatre/Events.json
 cache:
-  timeout: PT5M
+  timeout: PT10M
 logging:
   level:
+    ru:
+      nspk:
+        performance: debug
     liquibase: trace
 spring:
   jpa:
@@ -32,3 +35,5 @@ management:
     web:
       exposure:
         include: "*"
+server:
+  port: 8083

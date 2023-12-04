@@ -3,7 +3,6 @@ package ru.nspk.performance.transactionshandler.theatreclient;
 
 import ru.nspk.performance.theatre.dto.PurchaseResponse;
 
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -20,9 +19,9 @@ public interface TheatreClient {
     Set<String> seats(String event) throws ExecutionException, InterruptedException, TimeoutException;
 
     void reserve(String requestId,
-                            long event,
-                            List<String> seats,
-                            Consumer<String> callback) throws ExecutionException, InterruptedException, TimeoutException;
+                 String event,
+                 String seats,
+                 Consumer<String> callback);
 
     void release(long reserveId);
 
