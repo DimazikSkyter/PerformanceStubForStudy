@@ -2,7 +2,9 @@ version: '3.7'
 
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.1.2
+    #macos
+    image: docker.io/bitnami/zookeeper:3.8
+#    image: confluentinc/cp-zookeeper:5.1.2
     container_name: zg_core_zookeeper
     restart: always
     volumes:
@@ -11,6 +13,7 @@ services:
     environment:
       - ZOOKEEPER_CLIENT_PORT=2181
       - ZOOKEEPER_TICK_TIME=2000
+      - ALLOW_ANONYMOUS_LOGIN=yes
     ports:
       - 2181:2181
 

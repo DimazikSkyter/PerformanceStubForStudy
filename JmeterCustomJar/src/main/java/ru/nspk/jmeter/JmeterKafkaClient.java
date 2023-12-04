@@ -72,7 +72,7 @@ public class JmeterKafkaClient extends AbstractJavaSamplerClient {
 
         StringBuilder stringBuilder = new StringBuilder("");
         for(int i = 0; i < 10; i++) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.of(150, ChronoUnit.MILLIS));
+            ConsumerRecords<String, String> records = consumer.poll(Duration.of(500, ChronoUnit.MILLIS));
             for (ConsumerRecord<String, String> record : records) {
                 stringBuilder.append(record.value());
                 System.out.println("Get from kafka value " + record.value());
