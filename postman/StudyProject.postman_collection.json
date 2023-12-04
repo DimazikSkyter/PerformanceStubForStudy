@@ -56,6 +56,10 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
 						"url": ""
 					},
 					"response": []
@@ -75,6 +79,30 @@
 						"method": "GET",
 						"header": [],
 						"url": "http://localhost:8080/theatre/events/event1/info"
+					},
+					"response": []
+				},
+				{
+					"name": "createEvent",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"Концерт 60ых\",\r\n    \"date\" : \"2023-05-11\",\r\n    \"seatCount\" : 1000,\r\n    \"merchant\" : \"Купец калашников\",\r\n    \"type\" : \"концерт\"\r\n}"
+						},
+						"url": "http://localhost:{{TheatreAppPort}}/theatre/new_event"
 					},
 					"response": []
 				}
