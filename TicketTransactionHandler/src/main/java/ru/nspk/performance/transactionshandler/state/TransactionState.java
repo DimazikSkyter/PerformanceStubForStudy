@@ -12,8 +12,10 @@ public enum TransactionState {
     WAIT_FOR_PAYMENT_LINK(3),
     PAYMENT_LINK_CREATED(4),
     WAIT_FOR_PAYMENT(5),
-    COMPLETE(6),
-    REJECT(6);
+    NOTIFY_THEATRE(6),
+    NOTIFY_THEATRE_SEND(7),
+    COMPLETE(8),
+    REJECT(8);
 
     @Getter
     private final int stage;

@@ -11,7 +11,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import ru.nspk.performance.theatre.dto.PurchaseResponse;
+import ru.nspk.performance.action.NotifyTheatreAction;
 import ru.nspk.performance.transactionshandler.properties.TheatreClientProperties;
 
 import java.util.Set;
@@ -39,7 +39,8 @@ public class TheatreClientImpl implements TheatreClient {
         return client.get()
                 .uri("/theatre/events")
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Set<String>>() {})
+                .bodyToMono(new ParameterizedTypeReference<Set<String>>() {
+                })
                 .toFuture()
                 .get(theatreClientProperties.getTimeout(), TimeUnit.MILLISECONDS);
     }
@@ -49,7 +50,8 @@ public class TheatreClientImpl implements TheatreClient {
         return client.get()
                 .uri("/theatre/seats/" + event)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Set<String>>() {})
+                .bodyToMono(new ParameterizedTypeReference<Set<String>>() {
+                })
                 .toFuture()
                 .get(theatreClientProperties.getTimeout(), TimeUnit.MILLISECONDS);
     }
@@ -86,14 +88,16 @@ public class TheatreClientImpl implements TheatreClient {
     }
 
     @Override
-    public PurchaseResponse purchase(long reserveId) throws ExecutionException, InterruptedException, TimeoutException {
+    public void purchase(NotifyTheatreAction notifyTheatreAction, Consumer<String> callback) throws ExecutionException, InterruptedException, TimeoutException {
         //todo сделать политику ретрая если в театр пока не пришел положительный ответ
-        return client.get()
+        client.post()
                 .uri(uriBuilder -> uriBuilder.path("/theatre/purchase")
-                        .queryParam("reserve_id", reserveId).build())
+                        .queryParam("reserve_id", notifyTheatreAction.getReserveId()).build())
+                .header("REQUEST_ID", notifyTheatreAction.getRequestId())
                 .retrieve()
-                .bodyToMono(PurchaseResponse.class)
+                .bodyToMono(String.class)
                 .toFuture()
+                .thenAccept(callback)
                 .get(theatreClientProperties.getPurchaseTimeout(), TimeUnit.MILLISECONDS);
     }
 }

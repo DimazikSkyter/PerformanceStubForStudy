@@ -13,8 +13,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.nspk.performance.action.PaymentLinkResponseAction;
-import ru.nspk.performance.action.PaymentResultAction;
+import ru.nspk.performance.action.*;
 import ru.nspk.performance.api.TicketRequest;
 import ru.nspk.performance.keyvaluestorage.HazelcastKeyValue;
 import ru.nspk.performance.keyvaluestorage.HazelcastManager;
@@ -24,7 +23,6 @@ import ru.nspk.performance.keyvaluestorage.model.Person;
 import ru.nspk.performance.transactionshandler.dto.PaymentLinkResponse;
 import ru.nspk.performance.transactionshandler.dto.PaymentOrderResult;
 import ru.nspk.performance.transactionshandler.model.PaymentCheckResponse;
-import ru.nspk.performance.action.ReserveResponseAction;
 import ru.nspk.performance.transactionshandler.payment.PaymentClient;
 import ru.nspk.performance.transactionshandler.payment.PaymentClientImpl;
 import ru.nspk.performance.transactionshandler.properties.*;
@@ -50,6 +48,8 @@ public class AppConfiguration {
     @Bean
     public TransformerMultiton transformerMultiton() {
         Map<Class, Transformer> transformers = new HashMap<>();
+        transformers.put(CompleteAction.class, new CompleteTransformer());
+        transformers.put(NotifyTheatreAction.class, new NotifyTheatreActionTransformer());
         transformers.put(PaymentResultAction.class, new PaymentResultActionTransformer());
         transformers.put(PaymentLinkResponse.class, new PaymentLinkResponseActionTransformer());
         transformers.put(PaymentOrderResult.class, new PaymentOrderResultTransformer());

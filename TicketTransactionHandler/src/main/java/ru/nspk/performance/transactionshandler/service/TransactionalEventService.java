@@ -15,6 +15,7 @@ import ru.nspk.performance.keyvaluestorage.KeyValueStorage;
 import ru.nspk.performance.transactionshandler.dto.PaymentLinkResponse;
 import ru.nspk.performance.transactionshandler.dto.PaymentOrderResult;
 import ru.nspk.performance.transactionshandler.model.Seat;
+import ru.nspk.performance.transactionshandler.model.theatrecontract.PurchaseResponse;
 import ru.nspk.performance.transactionshandler.payment.PaymentClient;
 import ru.nspk.performance.transactionshandler.producer.KafkaProducer;
 import ru.nspk.performance.transactionshandler.properties.InMemoryProperties;
@@ -31,6 +32,7 @@ import ru.nspk.performance.transactionshandler.validator.ValidatorMultiton;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -159,6 +161,7 @@ public class TransactionalEventService {
         try {
             TicketTransactionState ticketTransactionState = TicketTransactionState.from(transactionState);
             ticketTransactionState.getActions().put("reserved", reserveResponseEvent);
+            ticketTransactionState.getEvent().setReserveId(reserveResponseEvent.getReserveId());
             ticketTransactionState.moveOnNextStep(TransactionState.RESERVE_REQUEST);
             updateTransactionState(ticketTransactionState);
             createPaymentLinkToPerson(reserveResponseEvent, ticketTransactionState);
@@ -272,6 +275,8 @@ public class TransactionalEventService {
     }
 
     public void updateTransactionStateAfterPaymentResult(PaymentOrderResult paymentOrderResult, Long transactionId, byte[] transactionStateBytes) {
+        log.debug("Get in update transaction state after load transaction state {} with payment order result {}",
+                transactionId, paymentOrderResult);
         try {
             TicketTransactionState ticketTransactionState = TicketTransactionState.from(transactionStateBytes);
             PaymentResultAction paymentLinkResponseAction = transformers.<PaymentOrderResult, PaymentResultAction>transform(paymentOrderResult, PaymentResultAction.class);
@@ -283,11 +288,59 @@ public class TransactionalEventService {
             } else {
                 ticketTransactionState.moveOnNextStep(TransactionState.WAIT_FOR_PAYMENT);
             }
-
-            saveEventToKafkaAndUpdateTransactionState(ticketTransactionState, paymentLinkResponseAction);
+            updateTransactionState(ticketTransactionState);
+            notifyTheatreWithNewRequest(ticketTransactionState);
         } catch (Exception e) {
             log.error("Failed to update transaction state for id {} after payment result {}", transactionId, paymentOrderResult, e);
             rejectTransaction(transactionId, "Failed to update transaction state after payment result");
+        }
+    }
+
+    private void notifyTheatreWithNewRequest(TicketTransactionState ticketTransactionState) throws ParseException, JsonProcessingException, UnsupportedEncodingException {
+        NotifyTheatreAction notifyTheatreAction = transformers.<TicketTransactionState, NotifyTheatreAction>transform(ticketTransactionState, NotifyTheatreAction.class);
+        keyValueStorage.put(REQUESTS_MAP, notifyTheatreAction.getRequestId(), ticketTransactionState.getTransactionId(),
+                bytes -> {
+                    try {
+                        theatreClient.purchase(notifyTheatreAction, this::complete);
+                    } catch (Exception e) {
+                        log.error("Failed to create request to purchase for transaction id {}", notifyTheatreAction.getTransactionId(), e);
+                    }
+                });
+        ticketTransactionState.getActions().put("notify", notifyTheatreAction);
+        ticketTransactionState.moveOnNextStep(TransactionState.NOTIFY_THEATRE);
+        updateTransactionState(ticketTransactionState);
+    }
+
+
+    private void complete(String purchaseBody) {
+        try {
+            //validate
+            CompleteAction completeAction = transformers.<CompleteAction>transform(purchaseBody, CompleteAction.class);
+            Long transactionId = (Long) keyValueStorage.get(REQUESTS_MAP, completeAction.getRequestId());
+            if (transactionId == null) {
+                log.error("Request of payment not found {}.", completeAction.getRequestId());
+                return;
+            }
+            completeAction.setTransactionId(transactionId);
+            keyValueStorage.<Long, byte[]>getAsync(TRANSACTIONS_MAP, transactionId)
+                    .toCompletableFuture()
+                    .thenAccept(transactionStateBytes -> finalize(completeAction, transactionId, transactionStateBytes))
+                    .orTimeout(inMemoryProperties.getTimeout(), TimeUnit.MILLISECONDS)
+                    .exceptionally(throwable -> rejectTransaction(transactionId, "Failed to get transaction by state"));
+        } catch (Exception e) {
+            log.error("Get error on complete stage {}", purchaseBody, e);
+        }
+    }
+
+    private void finalize(CompleteAction completeAction, Long transactionId, byte[] transactionStateBytes) {
+        try {
+            TicketTransactionState ticketTransactionState = TicketTransactionState.from(transactionStateBytes);
+            ticketTransactionState.moveOnNextStep(TransactionState.NOTIFY_THEATRE_SEND);
+            ticketTransactionState.getActions().put("complete", completeAction);
+            saveEventToKafkaAndUpdateTransactionState(ticketTransactionState, completeAction);
+            kafkaProducer.sendCompleteAction(completeAction.getBytes());
+        } catch (Exception e) {
+            log.error("Failed in finalize method for transaction id {}", transactionId, e);
         }
     }
 
@@ -350,7 +403,7 @@ public class TransactionalEventService {
             }, bytes -> {
                 try {
                     TransactionState currentState = TicketTransactionState.from(bytes).getCurrentState();
-                    return ! (TransactionState.REJECT.equals(currentState) || TransactionState.COMPLETE.equals(currentState));
+                    return !(TransactionState.REJECT.equals(currentState) || TransactionState.COMPLETE.equals(currentState));
                 } catch (IOException e) {
                     return false;
                 }

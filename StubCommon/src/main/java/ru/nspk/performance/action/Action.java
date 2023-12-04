@@ -18,7 +18,9 @@ import lombok.experimental.SuperBuilder;
         @JsonSubTypes.Type(value = PaymentLinkResponseAction.class),
         @JsonSubTypes.Type(value = PaymentResultAction.class),
         @JsonSubTypes.Type(value = SendPaymentLinkToApiAction.class),
-        @JsonSubTypes.Type(value = ReserveResponseAction.class)
+        @JsonSubTypes.Type(value = ReserveResponseAction.class),
+        @JsonSubTypes.Type(value = CompleteAction.class),
+        @JsonSubTypes.Type(value = NotifyTheatreAction.class)
 })
 @SuperBuilder
 public abstract class Action {

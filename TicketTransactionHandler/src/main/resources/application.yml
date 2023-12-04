@@ -31,10 +31,11 @@ logging:
 server:
   port: 8085
 kafka:
-  event-topic: events
+  action-topic: events
   bootstrap-address: localhost:9092
   transaction-state-topic: transaction_state
   payment-link-topic: payment_link
+  complete-action-topic: complete-event
 ticket:
   transaction:
     full-timeout-duration-ms: 30000

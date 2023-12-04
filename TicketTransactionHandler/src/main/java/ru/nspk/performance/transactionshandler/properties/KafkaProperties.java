@@ -18,7 +18,8 @@ public class KafkaProperties {
 
     //not used
     private String bootstrapAddress;
-    private String eventTopic;
+    private String actionTopic;
+    private String completeActionTopic;
     private String transactionStateTopic;
     private String paymentLinkTopic;
 }
