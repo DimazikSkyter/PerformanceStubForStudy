@@ -18,24 +18,6 @@ services:
       - prom_data:/prometheus
     networks:
       - monitoring
-    depends_on:
-      - cadvisor
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    privileged: true
-    ports:
-      - 8180:8080
-    command:
-      - "--storage_duration=10m0s"
-    volumes:
-      - "/:/rootfs:ro"
-      - "/var/run:/var/run:ro"
-      - "/sys:/sys:ro"
-      - "/var/lib/docker/:/var/lib/docker:ro"
-      - "/dev/disk/:/dev/disk:ro"
-    networks:
-      - monitoring
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -47,6 +29,13 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - ./grafana:/etc/grafana/provisioning/datasources
+    networks:
+      - monitoring
+  node_exporter:
+    container_name: node_exporter
+    image: prom/node-exporter
+    ports:
+      - 9100:9100
     networks:
       - monitoring
 volumes:
