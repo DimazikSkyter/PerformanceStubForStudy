@@ -29,3 +29,11 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+configurations {
+    runtimeClasspath {
+        extendsFrom compileOnly
+    }
+    testRuntimeClasspath {
+        extendsFrom compileOnly
+    }
+}
