@@ -21,6 +21,7 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.22'
 
     implementation "com.fasterxml.jackson.core:jackson-databind:$fasterXmlVersion"
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     implementation 'com.hazelcast:hazelcast-spring:5.1.3'
 

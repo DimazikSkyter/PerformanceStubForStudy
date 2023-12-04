@@ -16,7 +16,6 @@ rootProject.name = "PerformanceStubForStudy"
 
 include("TicketApi") // апи клиента, который ходит сделать резерв
 include("PaymentSystem")//система проведения оплаты
-//include "TicketReplicator" //ассинхронный репликатор из кафки в imdg или db
 include("Theatre") //апи театра у которого покупаются билеты
 include("TicketTransactionHandler") //Система транзакции
 include("GatlingTest")

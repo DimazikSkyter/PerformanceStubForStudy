@@ -20,4 +20,5 @@ public class KafkaProperties {
     private String bootstrapAddress;
     private String eventTopic;
     private String transactionStateTopic;
+    private String paymentLinkTopic;
 }

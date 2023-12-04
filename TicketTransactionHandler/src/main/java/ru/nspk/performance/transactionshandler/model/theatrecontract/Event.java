@@ -19,7 +19,7 @@ import java.util.List;
 public class Event {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @NonNull private Date eventDate;
+    private Date eventDate;
     private String eventName;
     private List<Seat> seats;
 }

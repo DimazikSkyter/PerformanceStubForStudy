@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package ru.nspk.performance.api;
+
+
+import "google/protobuf/timestamp.proto";
+
+option java_outer_classname = "PaymentLinkToApiProto";
+option java_multiple_files = true;
+option java_package = "ru.nspk.performance.api";
+
+message PaymentLinkToApi {
+  int64 linkedRequestId = 1;
+  int64 requestId = 2;
+  google.protobuf.Timestamp paymentLinkCreatedTime = 3;
+  int64 paymentLinkTimeToPayMs = 4;
+  bytes paymentLink = 5;
+}

@@ -13,27 +13,28 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.nspk.performance.action.PaymentLinkResponseAction;
+import ru.nspk.performance.action.PaymentResultAction;
 import ru.nspk.performance.api.TicketRequest;
 import ru.nspk.performance.keyvaluestorage.HazelcastKeyValue;
 import ru.nspk.performance.keyvaluestorage.HazelcastManager;
 import ru.nspk.performance.keyvaluestorage.KeyValuePortableFactory;
 import ru.nspk.performance.keyvaluestorage.KeyValueStorage;
 import ru.nspk.performance.keyvaluestorage.model.Person;
+import ru.nspk.performance.transactionshandler.dto.PaymentLinkResponse;
+import ru.nspk.performance.transactionshandler.dto.PaymentOrderResult;
 import ru.nspk.performance.transactionshandler.model.PaymentCheckResponse;
-import ru.nspk.performance.events.ReserveResponseAction;
-import ru.nspk.performance.transactionshandler.properties.EnvironmentProperties;
-import ru.nspk.performance.transactionshandler.properties.InMemoryProperties;
-import ru.nspk.performance.transactionshandler.properties.TheatreClientProperties;
-import ru.nspk.performance.transactionshandler.properties.TransactionProperties;
+import ru.nspk.performance.action.ReserveResponseAction;
+import ru.nspk.performance.transactionshandler.payment.PaymentClient;
+import ru.nspk.performance.transactionshandler.payment.PaymentClientImpl;
+import ru.nspk.performance.transactionshandler.properties.*;
 import ru.nspk.performance.transactionshandler.service.TransactionalEventService;
 import ru.nspk.performance.transactionshandler.state.TicketTransactionState;
 import ru.nspk.performance.transactionshandler.theatreclient.TheatreClient;
 import ru.nspk.performance.transactionshandler.theatreclient.TheatreClientImpl;
+import ru.nspk.performance.transactionshandler.theatreclient.dto.ReserveResponse;
 import ru.nspk.performance.transactionshandler.timeoutprocessor.TimeoutProcessor;
-import ru.nspk.performance.transactionshandler.transformer.ReserveResponseTransformer;
-import ru.nspk.performance.transactionshandler.transformer.TicketRequestTransformer;
-import ru.nspk.performance.transactionshandler.transformer.Transformer;
-import ru.nspk.performance.transactionshandler.transformer.TransformerMultiton;
+import ru.nspk.performance.transactionshandler.transformer.*;
 import ru.nspk.performance.transactionshandler.validator.*;
 
 import java.util.HashMap;
@@ -49,7 +50,11 @@ public class AppConfiguration {
     @Bean
     public TransformerMultiton transformerMultiton() {
         Map<Class, Transformer> transformers = new HashMap<>();
-        transformers.put(ReserveResponseTransformer.class, new ReserveResponseTransformer());
+        transformers.put(PaymentResultAction.class, new PaymentResultActionTransformer());
+        transformers.put(PaymentLinkResponse.class, new PaymentLinkResponseActionTransformer());
+        transformers.put(PaymentOrderResult.class, new PaymentOrderResultTransformer());
+        transformers.put(ReserveResponse.class, new ReserveResponseTransformer());
+        transformers.put(ReserveResponseAction.class, new PaymentLinkActionTransformer());
         transformers.put(TicketRequest.class, new TicketRequestTransformer());
         return new TransformerMultiton(transformers);
     }
@@ -74,11 +79,26 @@ public class AppConfiguration {
                 Pair.of("reserveId", "\"reserveId\"\\s*:\\s*[0-9]+")
                 //reserveStarted
                 //reserveDuration
+                //totalAmount
         );
 
-        inputValidators.put(PaymentCheckResponse.class, new PaymentCheckResponseInputValidator(paymentCheckResponsePatterns));
-        inputValidators.put(ReserveResponseAction.class, new ReserveResponseEventInputValidator(reserveResponseActionPatterns));
+        List<Pair<String, String>> paymentOrderPatterns = List.of(
+                Pair.of("requestId", "\"requestId\"\\s*:\\s*\".+\""),
+                Pair.of("status", "\"status\"\\s*:\\s*\"(Success|Failed)\"")
+        );
+
+        List<Pair<String, String>> paymentLinkPatterns = List.of(
+                Pair.of("status", "\"status\"\\s*:\\s*\"Created\""),
+                Pair.of("created", "\"created\"\\s*:\\s*\".+\""),
+                Pair.of("qrBytes", "\"qrBytes\"\\s*:\\s*\".+\"")
+        );
+
+        inputValidators.put(PaymentLinkResponse.class, new InputValidator(paymentLinkPatterns));
+        inputValidators.put(PaymentOrderResult.class, new InputValidator(paymentOrderPatterns));
+        inputValidators.put(PaymentCheckResponse.class, new InputValidator(paymentCheckResponsePatterns));
+        inputValidators.put(ReserveResponseAction.class, new InputValidator(reserveResponseActionPatterns));
         Map<Class, ModelValidator> modelValidators = new HashMap<>();
+
         modelValidators.put(TicketRequest.class, new TicketRequestInputValidator(keyValueStorage, theatreClient));
         return new ValidatorMultiton(inputValidators, modelValidators);
     }
@@ -129,6 +149,12 @@ public class AppConfiguration {
     public TheatreClient theatreClient(EnvironmentProperties environmentProperties,
                                        TheatreClientProperties theatreClientProperties) {
         return new TheatreClientImpl(environmentProperties.getTheatreBaseUrl(), theatreClientProperties);
+    }
+
+    @Bean
+    public PaymentClient paymentClient(EnvironmentProperties environmentProperties,
+                                       PaymentClientProperties paymentClientProperties) {
+        return new PaymentClientImpl(environmentProperties.getPaymentServiceBaseUrl(), paymentClientProperties);
     }
 
     @Bean

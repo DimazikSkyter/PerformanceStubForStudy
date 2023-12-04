@@ -71,6 +71,7 @@ public class HazelcastKeyValue<K, V> {
     }
 
     public V get(K key) throws ExecutionException, InterruptedException, TimeoutException {
+        log.debug("Get value for key {} in map", key, mapName);
         return map.getAsync(key)
                 .toCompletableFuture()
                 .get(timeout, TimeUnit.MILLISECONDS);

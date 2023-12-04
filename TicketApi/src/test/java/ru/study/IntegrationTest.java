@@ -10,11 +10,14 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -32,8 +35,12 @@ import ru.study.api.dto.SeatDto;
 import ru.study.api.dto.TicketDto;
 import ru.study.api.dto.TicketPurchaseRequest;
 import ru.nspk.performance.keyvaluestorage.model.Person;
+import ru.study.api.model.Event;
+import ru.study.api.properties.InMemoryProperties;
+import ru.study.api.service.EventService;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -46,6 +53,7 @@ public class IntegrationTest {
     static final KafkaContainer kafka = new KafkaContainer(
             DockerImageName.parse("confluentinc/cp-kafka:5.1.2")
     );
+    public static final String EVENT_NAME = "event_name";
 
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
@@ -71,7 +79,7 @@ public class IntegrationTest {
                 .passportCode("1123 303030")
                 .build();
         SeatDto seatDto = new SeatDto(place, price);
-        TicketPurchaseRequest ticketPurchaseRequest = new TicketPurchaseRequest("event name", List.of(new TicketDto(person, seatDto)));
+        TicketPurchaseRequest ticketPurchaseRequest = new TicketPurchaseRequest(EVENT_NAME, List.of(new TicketDto(person, seatDto)));
         webTestClient.put()
                 .uri("/storage/api/ticket/purchase")
                 .body(BodyInserters.fromValue(ticketPurchaseRequest))
@@ -89,7 +97,7 @@ public class IntegrationTest {
                     Assertions.assertEquals(0, ticketRequest.getRequestId());
                     Assertions.assertEquals((float) price, ticketRequest.getTicketInfo(0).getPrice());
                     Assertions.assertEquals(place, ticketRequest.getTicketInfo(0).getPlace());
-                    Assertions.assertEquals("2023-07-01", ticketRequest.getEventDate());
+                    Assertions.assertEquals("2025-12-03", ticketRequest.getEventDate());
                     log.info("Income ticket request\n{}", ticketRequest);
                     ticketRequestKafkaConsumer.close();
                     return;
@@ -106,8 +114,18 @@ public class IntegrationTest {
 
     }
 
+    @EnableConfigurationProperties
     @TestConfiguration
     public static class TestConfig {
+
+        @Primary
+        @Bean
+        public EventService eventService() {
+            EventService eventService = Mockito.mock(EventService.class);
+            Event event = new Event("event title", EVENT_NAME, Date.from(Instant.parse("2025-12-03T10:15:30.00Z")), "merchant", "type", true);
+            Mockito.doReturn(event).when(eventService).getEventByName(EVENT_NAME);
+            return  eventService;
+        }
 
         @Bean
         public KafkaConsumer<Long, byte[]> ticketRequestKafkaConsumer(ConsumerFactory<?, ?> consumerFactory) {

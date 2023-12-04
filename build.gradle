@@ -3,7 +3,7 @@ plugins {
     id "com.google.protobuf" version "0.9.1"
 }
 
-group 'stub'
+group 'ru.nspk'
 version '1.0-SNAPSHOT'
 
 repositories {

@@ -55,7 +55,7 @@ public class TheatreClientImpl implements TheatreClient {
     }
 
     @Override
-    public void reserve(String requestId, String event, String seats, Consumer<String> callback) throws InterruptedException, ExecutionException {
+    public void reserve(String requestId, String event, String seats, Consumer<String> callback) {
         log.debug("Calling theatre client with request id {}", requestId);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("event", event);
@@ -68,8 +68,7 @@ public class TheatreClientImpl implements TheatreClient {
                 .bodyToMono(String.class)
                 .toFuture()
                 .thenAccept(callback)
-                .orTimeout(theatreClientProperties.getTimeout(), TimeUnit.MILLISECONDS)
-                .get();
+                .orTimeout(theatreClientProperties.getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Override

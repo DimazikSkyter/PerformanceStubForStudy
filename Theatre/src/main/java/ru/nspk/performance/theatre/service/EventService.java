@@ -1,6 +1,7 @@
 package ru.nspk.performance.theatre.service;
 
 
+import ru.nspk.performance.theatre.dto.CreateEventRequest;
 import ru.nspk.performance.theatre.dto.EventDto;
 import ru.nspk.performance.theatre.dto.SeatResponse;
 import ru.nspk.performance.theatre.model.Event;
@@ -16,4 +17,6 @@ public interface EventService {
     SeatResponse seats(String eventName);
 
     EventDto eventInfo(String eventName);
+
+    EventDto createNewEvent(CreateEventRequest createEventRequest);
 }

@@ -12,11 +12,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.nspk.performance.theatre.model.Event;
 import ru.nspk.performance.theatre.model.Reserve;
+import ru.nspk.performance.theatre.model.Seat;
 import ru.nspk.performance.theatre.model.SeatStatus;
 import ru.nspk.performance.theatre.properties.CacheProperties;
 import ru.nspk.performance.theatre.service.ReserveCache;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,17 +38,17 @@ public class CacheTest {
 
     @Test
     void test() throws InterruptedException {
-        Map<String, SeatStatus> seats = new HashMap<>();
+        Map<String, Seat> seats = new HashMap<>();
         seats.putAll(Map.of(
-                "A1", SeatStatus.FREE,
-                "A2", SeatStatus.FREE,
-                "A3", SeatStatus.FREE,
-                "B1", SeatStatus.FREE,
-                "B2", SeatStatus.RESERVED,
-                "B3", SeatStatus.RESERVED
+                "A1", new Seat(SeatStatus.FREE, 31.1),
+                "A2", new Seat(SeatStatus.FREE, 31.1),
+                "A3", new Seat(SeatStatus.FREE, 31.1),
+                "B1", new Seat(SeatStatus.FREE, 31.1),
+                "B2", new Seat(SeatStatus.FREE, 31.2),
+                "B3", new Seat(SeatStatus.FREE, 31.2)
         ));
-        Event event = new Event("custom event", seats);
-        reserveCache.putReserve(1L, new Reserve(event, Instant.now(), List.of("B2", "B3")));
+        Event event = new Event("custom event", Date.from(Instant.now()), seats, "merchant", "type");
+        reserveCache.putReserve(1L, new Reserve(event, Instant.now(), List.of("B2", "B3"), seats.values().stream().map(Seat::price).reduce(Double::sum).get()));
         Cache reserves = cacheManager.getCache("reserves");
         Thread.sleep(2000);
         reserveCache.evictReserve(1L);

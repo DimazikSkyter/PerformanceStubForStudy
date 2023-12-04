@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import ru.nspk.performance.events.CreateReserveAction;
+import ru.nspk.performance.action.CreateReserveAction;
+import ru.nspk.performance.transactionshandler.model.Seat;
 import ru.nspk.performance.transactionshandler.model.theatrecontract.Event;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -38,15 +40,15 @@ class TicketTransactionStateTest {
     @Test
     void shouldTicketTransactionStateSerializeDeserialize() throws IOException {
 
-        Instant eventDate = Instant.now();
+        Date eventDate = Date.from(Instant.parse("2023-12-03T00:00:00.00Z"));
         Instant start = Instant.now();
-        List<String> seats = List.of("1A", "2B");
+        List<Seat> seats = List.of(new Seat("1A", 13.1, "user1"), new Seat("2A", 13.2, "user2"));
 
         TicketTransactionState ticketTransactionState = TicketTransactionState.builder()
                 .transactionId(123131541)
                 .currentState(TransactionState.COMPLETE)
                 .event(new Event(eventDate, "event name", seats))
-                .actions(Map.of("First", CreateReserveAction.builder().seats(seats).eventId(1).build()))
+                .actions(Map.of("First", CreateReserveAction.builder().seats(seats.stream().map(Seat::place).reduce((s, s2) -> s + "," + s2).get()).build()))
                 .start(start)
                 .build();
 
@@ -61,7 +63,7 @@ class TicketTransactionStateTest {
     void shouldMoveOnNextState(TicketTransactionState ticketTransactionState) {
         log.info("Test state move for state {}", ticketTransactionState.getCurrentState());
         int stage = ticketTransactionState.getCurrentState().getStage();
-        if (stage != 5) {
+        if (stage != 6) {
             ticketTransactionState.moveOnNextStep(ticketTransactionState.getCurrentState());
             Assertions.assertEquals(++stage, ticketTransactionState.getCurrentState().getStage());
             log.info("New state is {}", ticketTransactionState.getCurrentState());

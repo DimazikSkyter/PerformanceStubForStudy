@@ -1,2 +1,4 @@
 cache:
   timeout: PT4S
+events:
+  path: Events.json

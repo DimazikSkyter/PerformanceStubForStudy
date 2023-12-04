@@ -15,7 +15,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.nspk.performance.theatre.TheatreApp;
+import ru.nspk.performance.theatre.dto.ReleaseResponse;
 import ru.nspk.performance.theatre.dto.ReserveResponse;
+import ru.nspk.performance.theatre.dto.SeatDto;
+import ru.nspk.performance.theatre.dto.SeatResponse;
+import ru.nspk.performance.theatre.model.SeatStatus;
 import ru.nspk.performance.theatre.service.EventService;
 import ru.nspk.performance.theatre.service.PurchaseService;
 import ru.nspk.performance.theatre.service.ReserveService;
@@ -66,12 +70,13 @@ class TheatreControllerTest {
     void theatreShouldReturn9FreeSeatsOfEvents() throws Exception {
         String eventName = "Война и мир";
         val seats = generateSeats();
-        Mockito.doReturn(seats).when(eventService).seats(eventName);
+        SeatResponse seatResponse = SeatResponse.success(eventName, seats);
+        Mockito.doReturn(seatResponse).when(eventService).seats(eventName);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/theatre/seats/" + eventName))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(9)));
+                .andExpect(jsonPath("$.seats", hasSize(5)));
     }
 
     @Test
@@ -83,9 +88,15 @@ class TheatreControllerTest {
                         .reserveId(reserveId)
                         .nonFreeSeats(Set.of())
                         .reserveStarted(Instant.now()).build())
-                .when(reserveService).reserve(eq(eventName), Mockito.any());
+                .when(reserveService).reserve(eq(eventName), Mockito.any(), Mockito.any());
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/theatre/reserve?event=" + eventName + "&seats=[\"A3\", \"A4\"]"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/theatre/reserve")
+                        .with(request -> {
+                                    request.setParameter("event", eventName);
+                                    request.setParameter("seat", "[\"A3\", \"A4\"]");
+                                    return request;
+                                }
+                        ))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reserveId").value(String.valueOf(reserveId)))
@@ -95,13 +106,17 @@ class TheatreControllerTest {
     @Test
     void theatreShouldReleaseTheReserve() throws Exception {
         long reserveId = 34;
+        ReleaseResponse reserveResponse = new ReleaseResponse("Success", reserveId, null);
+        Mockito.doReturn(reserveResponse).when(reserveService).release(Mockito.eq(reserveId));
 
-        Mockito.doNothing().when(reserveService).release(reserveId);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/theatre/release?reserveId=" + reserveId))
+        mockMvc.perform(MockMvcRequestBuilders.post("/theatre/release").with(request -> {
+                request.addParameter("reserve_id", String.valueOf(reserveId));
+                return  request;
+                }))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").doesNotExist());
+                .andExpect(jsonPath("$.message").value("Success"))
+                .andExpect(jsonPath("$.reserveId").value(34));
 
         Mockito.verify(reserveService, new Times(1)).release(34);
     }
@@ -114,17 +129,13 @@ class TheatreControllerTest {
         );
     }
 
-    private Set<String> generateSeats() {
+    private Set<SeatDto> generateSeats() {
         return Set.of(
-                "A1",
-                "A2",
-                "A3",
-                "A4",
-                "A5",
-                "B1",
-                "B2",
-                "B3",
-                "B4"
+                new SeatDto("A1", SeatStatus.FREE, 1.1),
+                new SeatDto("A2", SeatStatus.FREE, 1.2),
+                new SeatDto("A3", SeatStatus.FREE, 1.3),
+                new SeatDto("A4", SeatStatus.FREE, 1.4),
+                new SeatDto("A5", SeatStatus.FREE, 1.5)
         );
     }
 }

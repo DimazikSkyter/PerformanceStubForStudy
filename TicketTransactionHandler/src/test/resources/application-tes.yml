@@ -1,0 +1,9 @@
+logging:
+  level:
+    root: debug
+in-memory:
+  address: localhost:5071
+  time-to-live: 300
+  lock-timeout-ms: 133
+  charset: UTF-8
+  timeout: 300

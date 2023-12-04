@@ -16,6 +16,7 @@ repositories {
 dependencies {
 
     compileOnly project(":StubCommon")
+    implementation 'com.google.zxing:core:3.3.2'
 
     //spring web
     implementation 'org.springframework.boot:spring-boot-starter-web'

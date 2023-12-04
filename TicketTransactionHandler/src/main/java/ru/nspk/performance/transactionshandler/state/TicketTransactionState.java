@@ -4,12 +4,10 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hazelcast.nio.serialization.Portable;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
 import lombok.Builder;
 import lombok.Data;
-import ru.nspk.performance.events.Action;
+import lombok.ToString;
+import ru.nspk.performance.action.Action;
 import ru.nspk.performance.transactionshandler.model.theatrecontract.Event;
 
 import java.io.IOException;
@@ -22,6 +20,7 @@ import java.util.Optional;
 //todo перенести в common
 @Builder
 @Data
+@ToString(exclude = {"ticketFlow"})
 public class TicketTransactionState implements TicketFlow, Serializable {
 
     @JsonIgnore
@@ -34,9 +33,10 @@ public class TicketTransactionState implements TicketFlow, Serializable {
     private final Map<TransactionState, TransactionState> ticketFlow = Map.of(
             TransactionState.NEW_TRANSACTION, TransactionState.RESERVE_REQUEST,
             TransactionState.RESERVE_REQUEST, TransactionState.RESERVED,
-            TransactionState.RESERVED, TransactionState.WAIT_FOR_PAYMENT,
-            TransactionState.WAIT_FOR_PAYMENT, TransactionState.WAIT_MERCHANT_APPROVE,
-            TransactionState.WAIT_MERCHANT_APPROVE, TransactionState.COMPLETE
+            TransactionState.RESERVED, TransactionState.WAIT_FOR_PAYMENT_LINK,
+            TransactionState.WAIT_FOR_PAYMENT_LINK, TransactionState.PAYMENT_LINK_CREATED,
+            TransactionState.PAYMENT_LINK_CREATED, TransactionState.WAIT_FOR_PAYMENT,
+            TransactionState.WAIT_FOR_PAYMENT, TransactionState.COMPLETE
     );
 
 
@@ -78,6 +78,9 @@ public class TicketTransactionState implements TicketFlow, Serializable {
         this.errorReason = reason;
     }
 
+
+    //todo подумать об ordinal в enum
+    //todo может быть гонка состояний,  нужно сделать либо меньше, либо текущий. Далее нужно сохранить экшен в KV, но дальше идти не нужно
     @Override
     public void moveOnNextStep(TransactionState receivedCurrentState) {
         if (this.currentState.equals(receivedCurrentState)) {

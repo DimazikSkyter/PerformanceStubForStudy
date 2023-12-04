@@ -3,7 +3,7 @@ spring:
     consumer:
       bootstrap-servers: localhost:9092
       auto-offset-reset: earliest
-      group_id: group-id
+      group_id: transaction_service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
     producer:
@@ -16,9 +16,9 @@ payment-service:
   payment-service-path: /processing/payment/paymentLink
 in-memory:
   address: "localhost:5701"
-  timeout: 150
+  timeout: 500
   charset: UTF-8
-  lock-timeout-ms: 250
+  lock-timeout-ms: 500
   time-to-live: 100000000
 management:
   server:
@@ -34,12 +34,17 @@ kafka:
   event-topic: events
   bootstrap-address: localhost:9092
   transaction-state-topic: transaction_state
+  payment-link-topic: payment_link
 ticket:
   transaction:
     full-timeout-duration-ms: 30000
 environment:
   theatre-base-url: "http://localhost:8083"
+  payment-service-base-url: "http://localhost:8087"
 theatre:
   client:
     purchase-timeout: 1000
+    timeout: 3000
+payment:
+  client:
     timeout: 300

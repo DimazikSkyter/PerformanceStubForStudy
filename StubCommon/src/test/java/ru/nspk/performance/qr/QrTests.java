@@ -23,6 +23,7 @@ public class QrTests {
                 .targetAccount("12305678941230567894")
                 .build());
 
+
         BufferedImage referenceQr = ImageIO.read(Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("create-test-qr.png")));
 
         Assertions.assertTrue(isBufferedImagesEqual(referenceQr, qrImage));

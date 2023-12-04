@@ -9,4 +9,5 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "environment")
 public class EnvironmentProperties {
     private String theatreBaseUrl;
+    private String paymentServiceBaseUrl;
 }

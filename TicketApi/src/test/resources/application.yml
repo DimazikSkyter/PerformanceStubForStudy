@@ -1,3 +1,4 @@
+
 kafka:
   partitions:
   int:
@@ -12,3 +13,9 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.LongSerializer
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+in-memory:
+  address: "localhost:5701"
+  timeout: 150
+  charset: UTF-8
+  lock-timeout-ms: 250
+  time-to-live: 10000000

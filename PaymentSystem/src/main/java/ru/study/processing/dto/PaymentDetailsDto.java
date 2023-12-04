@@ -5,9 +5,10 @@ import ru.nspk.performance.qr.QrData;
 public class PaymentDetailsDto {
 
     private String purpose;
-    private int amount;
+    private double amount;
+    private String account;
 
-    public QrData toQrData(String account) {
+    public QrData toQrData() {
         return QrData.builder()
                 .purpose(purpose)
                 .amount(amount)

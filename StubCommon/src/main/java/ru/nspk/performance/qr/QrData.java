@@ -17,7 +17,7 @@ public class QrData {
     //private long qrId;
     private String purpose;
     private String targetAccount;
-    private int amount;
+    private double amount;
 
     //todo раскомментировать
     //private Instant closeTimestamp;
@@ -55,7 +55,7 @@ public class QrData {
                 qrData.targetAccount = value;
                 break;
             case "A":
-                qrData.amount = Integer.parseInt(value);
+                qrData.amount = Double.parseDouble(value);
                 break;
             default:
                 logger.log(Level.ALL, "Failed to find field {}", fieldAlias);

@@ -1,0 +1,214 @@
+{
+	"info": {
+		"_postman_id": "159bdc54-346e-40d2-9ac6-a9aecb46fe72",
+		"name": "StudyProject",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "10530646"
+	},
+	"item": [
+		{
+			"name": "Theatre",
+			"item": [
+				{
+					"name": "make reservice",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "event",
+									"value": "event1",
+									"type": "text"
+								},
+								{
+									"key": "seat",
+									"value": "1A,1C",
+									"type": "text"
+								}
+							]
+						},
+						"url": "localhost:8080/theatre/reserve"
+					},
+					"response": []
+				},
+				{
+					"name": "list of events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:{{TheatreAppPort}}/theatre/events"
+					},
+					"response": []
+				},
+				{
+					"name": "list of free seats for event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:8080/theatre/seats/event1"
+					},
+					"response": []
+				},
+				{
+					"name": "reserve",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": ""
+					},
+					"response": []
+				},
+				{
+					"name": "purchase",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": ""
+					},
+					"response": []
+				},
+				{
+					"name": "event_info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/theatre/events/event1/info"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TicketApi",
+			"item": [
+				{
+					"name": "event_list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:{{TicketStoreAppPort}}/events/list?meachant=merchant1&date=2023-10-01",
+							"host": [
+								"localhost"
+							],
+							"port": "{{TicketStoreAppPort}}",
+							"path": [
+								"events",
+								"list"
+							],
+							"query": [
+								{
+									"key": "meachant",
+									"value": "merchant1"
+								},
+								{
+									"key": "date",
+									"value": "2023-10-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "seats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:{{TicketStoreAppPort}}/events/event1/seats"
+					},
+					"response": []
+				},
+				{
+					"name": "purchase",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "uniqueId",
+								"value": "1",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"eventName\" : \"event1\",\r\n    \"tickets\" : [\r\n        {\r\n            \"person\" : {\r\n                \"fio\" : \"A B C\",\r\n                \"passportCode\" : \"1111 222333\",\r\n                \"age\" : 33,\r\n                \"address\" : \"E F G\"\r\n            },\r\n            \"seat\" : {\r\n                \"place\": \"4A\",\r\n                \"price\": 13.5\r\n            }\r\n        }\r\n    ]\r\n}"
+						},
+						"url": "http://localhost:{{TicketStoreAppPort}}/storage/api/ticket/purchase"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PaymentSystem",
+			"item": [
+				{
+					"name": "PaymentLink",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "REQUEST_ID",
+								"value": "12345",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"purpose\" : \"Some purpose\",\r\n    \"amount\" : 123.2,\r\n    \"account\": \"acount of nothing\"\r\n}"
+						},
+						"url": "localhost:{{PaymentSystemPort}}/processing/payment/payment_link"
+					},
+					"response": []
+				},
+				{
+					"name": "Pay",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "secretKey",
+									"value": "123",
+									"type": "text"
+								},
+								{
+									"key": "secretPaymentIdentification",
+									"value": "I8TwT9qXSPyDRuR5y2mvqQ",
+									"type": "text"
+								}
+							]
+						},
+						"url": "localhost:{{PaymentSystemPort}}/processing/payment/pay"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

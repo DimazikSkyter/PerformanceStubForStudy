@@ -1,22 +1,30 @@
 package ru.nspk.performance.transactionshandler.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.nspk.performance.api.TicketRequest;
 import ru.nspk.performance.base.TicketInfo;
 import ru.nspk.performance.keyvaluestorage.KeyValueStorage;
 import ru.nspk.performance.transactionshandler.model.Seat;
 import ru.nspk.performance.transactionshandler.model.theatrecontract.Event;
+import ru.nspk.performance.transactionshandler.payment.PaymentClient;
 import ru.nspk.performance.transactionshandler.producer.KafkaProducer;
+import ru.nspk.performance.transactionshandler.properties.InMemoryProperties;
 import ru.nspk.performance.transactionshandler.properties.TransactionProperties;
 import ru.nspk.performance.transactionshandler.state.TicketTransactionState;
 import ru.nspk.performance.transactionshandler.state.TransactionState;
@@ -35,8 +43,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 //todo Сейчас ЗДЕСЬ
 @Slf4j
-@SpringBootTest(classes = {TransactionalEventService.class, TransactionalEventServiceTest.TransactionEventServiceTestConfig.class})
+@SpringBootTest(classes = {TransactionalEventService.class, TransactionalEventServiceTest.TransactionEventServiceTestConfig.class, InMemoryProperties.class})
 @ExtendWith(SpringExtension.class)
+@Profile(value = "tes")
 @EnableConfigurationProperties
 class TransactionalEventServiceTest {
 
@@ -56,13 +65,13 @@ class TransactionalEventServiceTest {
     @MockBean
     private TransactionProperties transactionProperties;
     @MockBean
-    private PaymentService paymentService;
+    private PaymentClient paymentClient;
 
     @Autowired
     private TransactionalEventService transactionalEventService;
 
     @Test
-    void shouldPositiveHandleNewTicketEvent() throws InterruptedException, ParseException {
+    void shouldPositiveHandleNewTicketEvent() throws InterruptedException, ParseException, JsonProcessingException {
         log.info("Start new ticket event test");
         TicketRequest ticketRequest = TicketRequest.newBuilder()
                 .setRequestId(311)
@@ -89,6 +98,7 @@ class TransactionalEventServiceTest {
     }
 
     @TestConfiguration
+    @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
     public static class TransactionEventServiceTestConfig {
 
         @Bean
