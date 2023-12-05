@@ -17,7 +17,7 @@ public class KafkaProducer {
     private final KafkaProperties kafkaProperties;
 
     public CompletableFuture<SendResult<Long, byte[]>> sendAction(Long key, byte[] value) {
-        return template.send(kafkaProperties.getEventTopic(), key, value);
+        return template.send(kafkaProperties.getActionTopic(), key, value);
     }
 
     public CompletableFuture<SendResult<Long, byte[]>> sendTransactionState(Long transactionId, byte[] bytes) throws JsonProcessingException {
@@ -25,8 +25,8 @@ public class KafkaProducer {
         return template.send(kafkaProperties.getTransactionStateTopic(), bytes);
     }
 
-    public CompletableFuture<SendResult<Long, byte[]>> sendAction(byte[] bytes) {
-        return template.send(kafkaProperties.getEventTopic(), bytes);
+    public CompletableFuture<SendResult<Long, byte[]>> sendCompleteAction(byte[] bytes) {
+        return template.send(kafkaProperties.getActionTopic(), bytes);
     }
 
     public CompletableFuture<SendResult<Long, byte[]>> sendPaymentLinkForApi(byte[] bytes) {

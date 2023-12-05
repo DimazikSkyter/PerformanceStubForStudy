@@ -15,4 +15,5 @@ message PaymentLinkToApi {
   google.protobuf.Timestamp paymentLinkCreatedTime = 3;
   int64 paymentLinkTimeToPayMs = 4;
   bytes paymentLink = 5;
+  string paymentLinkRequestId = 6;
 }

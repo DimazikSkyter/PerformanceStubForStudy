@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.nspk.performance.theatre.entity.Purchase;
-import ru.nspk.performance.theatre.exception.SeatsAlreadySoldException;
 import ru.nspk.performance.theatre.dto.PurchaseResponse;
 import ru.nspk.performance.theatre.model.Reserve;
 import ru.nspk.performance.theatre.repository.PurchaseRepository;
@@ -20,7 +19,7 @@ public class AutoPurchaseServiceImpl implements PurchaseService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public PurchaseResponse purchase(long reserveId) {
+    public PurchaseResponse purchase(long reserveId, String requestId) {
         try {
             Reserve reserve = reserveCache.getReserve(reserveId);
             reserve.purchase();
@@ -34,8 +33,8 @@ public class AutoPurchaseServiceImpl implements PurchaseService {
                     .build());
         } catch (Exception e) {
             log.error("Failed to purchase with reserveId {} with exception\n", reserveId, e);
-            return PurchaseResponse.builder().result(false).build();
+            return PurchaseResponse.builder().requestId(requestId).result(false).build();
         }
-        return PurchaseResponse.builder().result(true).build();
+        return PurchaseResponse.builder().requestId(requestId).result(true).build();
     }
 }

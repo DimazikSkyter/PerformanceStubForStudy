@@ -40,7 +40,8 @@ public class PaymentController {
     }
 
     @PostMapping("/pay")
-    public PaymentOrderResponse pay(PaymentOrderDto paymentOrderDto) {
+    public PaymentOrderResponse pay(@RequestBody PaymentOrderDto paymentOrderDto) {
+        log.info("New pay request {}", paymentOrderDto);
         PaymentOrderResponse paymentOrderResponse = paymentCheckService.pay(paymentOrderDto);
         //todo временный костыль
         paymentOrderResponse.setRequestId(paymentOrderDto.getSecretPaymentIdentification());

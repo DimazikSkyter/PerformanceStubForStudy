@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class PurchaseResponse {
 
     private boolean result;
+    private String requestId;
 }

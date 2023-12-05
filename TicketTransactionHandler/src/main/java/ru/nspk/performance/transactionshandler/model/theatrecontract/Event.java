@@ -22,4 +22,5 @@ public class Event {
     private Date eventDate;
     private String eventName;
     private List<Seat> seats;
+    private Long reserveId;
 }

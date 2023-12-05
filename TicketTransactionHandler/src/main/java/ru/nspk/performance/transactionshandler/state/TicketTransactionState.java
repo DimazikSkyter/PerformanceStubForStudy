@@ -36,7 +36,9 @@ public class TicketTransactionState implements TicketFlow, Serializable {
             TransactionState.RESERVED, TransactionState.WAIT_FOR_PAYMENT_LINK,
             TransactionState.WAIT_FOR_PAYMENT_LINK, TransactionState.PAYMENT_LINK_CREATED,
             TransactionState.PAYMENT_LINK_CREATED, TransactionState.WAIT_FOR_PAYMENT,
-            TransactionState.WAIT_FOR_PAYMENT, TransactionState.COMPLETE
+            TransactionState.WAIT_FOR_PAYMENT, TransactionState.NOTIFY_THEATRE,
+            TransactionState.NOTIFY_THEATRE, TransactionState.NOTIFY_THEATRE_SEND,
+            TransactionState.NOTIFY_THEATRE_SEND, TransactionState.COMPLETE
     );
 
 

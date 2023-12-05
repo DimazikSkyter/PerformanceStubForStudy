@@ -1,6 +1,7 @@
 package ru.nspk.performance.transactionshandler.theatreclient;
 
 
+import ru.nspk.performance.action.NotifyTheatreAction;
 import ru.nspk.performance.theatre.dto.PurchaseResponse;
 
 import java.util.Set;
@@ -25,5 +26,5 @@ public interface TheatreClient {
 
     void release(long reserveId);
 
-    PurchaseResponse purchase(long reserveId) throws ExecutionException, InterruptedException, TimeoutException;
+    void purchase(NotifyTheatreAction notifyTheatreAction, Consumer<String> callback) throws ExecutionException, InterruptedException, TimeoutException;
 }

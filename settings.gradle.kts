@@ -21,3 +21,4 @@ include("TicketTransactionHandler") //Система транзакции
 include("GatlingTest")
 include("StubCommon")
 include("JmeterCustomJar")
+include("TicketReplicator")

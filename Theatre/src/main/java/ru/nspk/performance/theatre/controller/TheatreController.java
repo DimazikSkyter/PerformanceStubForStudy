@@ -51,7 +51,7 @@ public class TheatreController {
     }
 
     @PostMapping("/purchase")
-    public PurchaseResponse purchase(@RequestParam(name = "reserve_id") long reserveId) {
-        return purchaseService.purchase(reserveId);
+    public PurchaseResponse purchase(@RequestParam(name = "reserve_id") long reserveId, @RequestHeader(name = "REQUEST_ID", required = false) String requestId) {
+        return purchaseService.purchase(reserveId, requestId);
     }
 }
