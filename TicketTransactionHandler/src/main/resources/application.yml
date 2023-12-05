@@ -16,7 +16,7 @@ payment-service:
   payment-service-path: /processing/payment/paymentLink
 in-memory:
   address: "localhost:5701"
-  timeout: 500
+  timeout: 1000
   charset: UTF-8
   lock-timeout-ms: 500
   time-to-live: 100000000
@@ -37,7 +37,7 @@ kafka:
   payment-link-topic: payment_link
 ticket:
   transaction:
-    full-timeout-duration-ms: 30000
+    full-timeout-duration-ms: 60000
 environment:
   theatre-base-url: "http://localhost:8083"
   payment-service-base-url: "http://localhost:8087"

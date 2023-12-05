@@ -336,6 +336,7 @@ public class TransactionalEventService {
     }
 
     public Void rejectTransaction(long transactionId, String reason) { //перевести reason в enum
+        log.info("Reject income transaction {} with reason'{}'", transactionId, reason);
         try {
             Tuple2<Boolean, byte[]> transactionStatusTuple = keyValueStorage.<Long, byte[]>updateWithCondition(TRANSACTIONS_MAP, transactionId, bytes -> {
                 TicketTransactionState ticketTransactionState = null;
