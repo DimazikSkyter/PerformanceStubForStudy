@@ -242,6 +242,7 @@ public class TransactionalEventService {
                         .setSeconds(paymentLinkResponseAction.getPaymentLinkCreated().getEpochSecond())
                         .setNanos(paymentLinkResponseAction.getPaymentLinkCreated().getNano())
                         .build())
+                .setPaymentLinkRequestId(paymentLinkResponseAction.getRequestId())
                 .build();
         kafkaProducer.sendPaymentLinkForApi(paymentLinkToApi.toByteArray());
         ticketTransactionState.moveOnNextStep(TransactionState.PAYMENT_LINK_CREATED);

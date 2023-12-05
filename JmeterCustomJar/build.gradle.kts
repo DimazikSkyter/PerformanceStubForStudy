@@ -17,6 +17,13 @@ repositories {
 
 
 dependencies {
+
+    implementation(project(":StubCommon"))
+
+    // https://mvnrepository.com/artifact/io.projectreactor.netty/reactor-netty-http
+    implementation("io.projectreactor.netty:reactor-netty-http:1.1.10")
+
+
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
 
     implementation("org.apache.kafka:kafka-clients:3.6.0")
