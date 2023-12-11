@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import com.hazelcast.jet.datamodel.Tuple2;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,13 +39,14 @@ import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 
 //todo очередность событий может быть нарушена
-@RequiredArgsConstructor
 @Service
 @Slf4j
 public class TransactionalEventService {
@@ -61,7 +65,39 @@ public class TransactionalEventService {
     private final TimeoutProcessor timeoutProcessor;
     private final TransactionProperties transactionProperties;
     private final InMemoryProperties inMemoryProperties;
+    private final MeterRegistry meterRegistry;
+
+    private Counter transactionsCounterReject;
+    private Counter transactionsCounterSuccess;
+
+    private final Map<TransactionState, Timer> timersMap = new HashMap<>();
     private AtomicLong requestIterator = new AtomicLong(0);
+    public TransactionalEventService(KafkaProducer kafkaProducer,
+    ValidatorMultiton validators,
+    TheatreClient theatreClient,
+    PaymentClient paymentClient,
+    TransformerMultiton transformers,
+    KeyValueStorage keyValueStorage,
+    TimeoutProcessor timeoutProcessor,
+    TransactionProperties transactionProperties,
+    InMemoryProperties inMemoryProperties,
+                                     MeterRegistry meterRegistry) {
+        this.kafkaProducer = kafkaProducer;
+        this.validators = validators;
+        this.theatreClient = theatreClient;
+        this.paymentClient = paymentClient;
+        this.transformers = transformers;
+        this.keyValueStorage = keyValueStorage;
+        this.timeoutProcessor = timeoutProcessor;
+        this.transactionProperties = transactionProperties;
+        this.inMemoryProperties = inMemoryProperties;
+        this.meterRegistry = meterRegistry;
+
+        this.transactionsCounterReject = meterRegistry.counter("handled_transaction", "result", "reject");
+        this.transactionsCounterSuccess = meterRegistry.counter("handled_transaction", "result", "success");
+    }
+
+
 
     @Transactional
     public void newTicketEvent(TicketRequest ticketRequest) {
@@ -118,6 +154,8 @@ public class TransactionalEventService {
             theatreClient.reserve(requestId, ticketTransactionState.getEvent().getEventName(), createReserveEvent.getSeats(), this::handleReserveResponse);
             ticketTransactionState.getActions().put("create reserve", createReserveEvent);
             ticketTransactionState.moveOnNextStep(TransactionState.NEW_TRANSACTION);
+            timerIncrement(ticketTransactionState);
+
             kafkaProducer.sendAction(ticketTransactionState.getTransactionId(), createReserveEvent.getBytes());
             updateTransactionState(ticketTransactionState);
         } catch (Exception e) {
@@ -163,6 +201,7 @@ public class TransactionalEventService {
             ticketTransactionState.getActions().put("reserved", reserveResponseEvent);
             ticketTransactionState.getEvent().setReserveId(reserveResponseEvent.getReserveId());
             ticketTransactionState.moveOnNextStep(TransactionState.RESERVE_REQUEST);
+            timerIncrement(ticketTransactionState);
             updateTransactionState(ticketTransactionState);
             createPaymentLinkToPerson(reserveResponseEvent, ticketTransactionState);
         } catch (Exception e) {
@@ -179,6 +218,7 @@ public class TransactionalEventService {
             paymentLinkAction.setPurpose(buildPurpose(ticketTransactionState, paymentLinkAction.getAmount()));
             ticketTransactionState.getActions().put("create_payment_link", paymentLinkAction);
             ticketTransactionState.moveOnNextStep(TransactionState.RESERVED);
+            timerIncrement(ticketTransactionState);
             keyValueStorage.put(REQUESTS_MAP, paymentLinkAction.getRequestId(), ticketTransactionState.getTransactionId(),
                     bytes -> paymentClient.createPaymentLinkInPaymentService(paymentLinkAction, this::handlePaymentLinkResponse));
             saveEventToKafkaAndUpdateTransactionState(ticketTransactionState, paymentLinkAction);
@@ -221,6 +261,7 @@ public class TransactionalEventService {
             TicketTransactionState ticketTransactionState = TicketTransactionState.from(transactionState);
             ticketTransactionState.getActions().put("payment_link_created", paymentLinkResponseAction);
             ticketTransactionState.moveOnNextStep(TransactionState.WAIT_FOR_PAYMENT_LINK);
+            timerIncrement(ticketTransactionState);
             updateTransactionState(ticketTransactionState);
             sendPaymentLinkToKafkaToApi(paymentLinkResponseAction, ticketTransactionState);
         } catch (Exception e) {
@@ -246,6 +287,7 @@ public class TransactionalEventService {
                 .build();
         kafkaProducer.sendPaymentLinkForApi(paymentLinkToApi.toByteArray());
         ticketTransactionState.moveOnNextStep(TransactionState.PAYMENT_LINK_CREATED);
+        timerIncrement(ticketTransactionState);
         SendPaymentLinkToApiAction sendPaymentLinkToApiAction = SendPaymentLinkToApiAction.builder()
                 .createdTime(paymentLinkToApiStartTime)
                 .transactionId(ticketTransactionState.getTransactionId())
@@ -288,6 +330,7 @@ public class TransactionalEventService {
                 ticketTransactionState.rejectTransaction("Unsuccessful payment result");
             } else {
                 ticketTransactionState.moveOnNextStep(TransactionState.WAIT_FOR_PAYMENT);
+                timerIncrement(ticketTransactionState);
             }
             updateTransactionState(ticketTransactionState);
             notifyTheatreWithNewRequest(ticketTransactionState);
@@ -309,6 +352,7 @@ public class TransactionalEventService {
                 });
         ticketTransactionState.getActions().put("notify", notifyTheatreAction);
         ticketTransactionState.moveOnNextStep(TransactionState.NOTIFY_THEATRE);
+        timerIncrement(ticketTransactionState);
         updateTransactionState(ticketTransactionState);
     }
 
@@ -337,9 +381,11 @@ public class TransactionalEventService {
         try {
             TicketTransactionState ticketTransactionState = TicketTransactionState.from(transactionStateBytes);
             ticketTransactionState.moveOnNextStep(TransactionState.NOTIFY_THEATRE_SEND);
+            timerIncrement(ticketTransactionState);
             ticketTransactionState.getActions().put("complete", completeAction);
             saveEventToKafkaAndUpdateTransactionState(ticketTransactionState, completeAction);
             kafkaProducer.sendCompleteAction(completeAction.getBytes());
+            transactionsCounterSuccess.increment();
         } catch (Exception e) {
             log.error("Failed in finalize method for transaction id {}", transactionId, e);
         }
@@ -391,6 +437,7 @@ public class TransactionalEventService {
 
     public Void rejectTransaction(long transactionId, String reason) { //перевести reason в enum
         log.info("Reject income transaction {} with reason'{}'", transactionId, reason);
+        transactionsCounterReject.increment();
         try {
             Tuple2<Boolean, byte[]> transactionStatusTuple = keyValueStorage.<Long, byte[]>updateWithCondition(TRANSACTIONS_MAP, transactionId, bytes -> {
                 TicketTransactionState ticketTransactionState = null;
@@ -441,6 +488,11 @@ public class TransactionalEventService {
                         .map(Seat::place)
                         .reduce((s, s2) -> s + "," + s2).orElseThrow(RuntimeException::new),
                 amount);
+    }
+
+    private void timerIncrement(TicketTransactionState ticketTransactionState) {
+        Timer timer = timersMap.computeIfAbsent(ticketTransactionState.getCurrentState(), ts -> meterRegistry.timer("transaction_state_time", "state", ticketTransactionState.getCurrentState().name()));
+        timer.record(Duration.between(ticketTransactionState.getStart(), Instant.now()));
     }
 
     //todo перенести в трансформер

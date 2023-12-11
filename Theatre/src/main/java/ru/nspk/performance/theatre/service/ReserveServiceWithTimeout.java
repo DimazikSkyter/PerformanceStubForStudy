@@ -73,6 +73,8 @@ public class ReserveServiceWithTimeout implements ReserveService {
                     .requestId(requestId)
                     .build();
         } catch (Exception e) {
+            log.error("Failed to make reserve for event {} for seats {}. RequestId = {}",
+                    eventName, seats, requestId, e);
             return ReserveResponse.builder()
                     .reserveId(-1)
                     .requestId(requestId)
