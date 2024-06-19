@@ -14,3 +14,5 @@ build/libs/
 build/tmp/
 /test-reports/
 /test-reports/
+/JmeterCustomJar.iml
+/*/build/

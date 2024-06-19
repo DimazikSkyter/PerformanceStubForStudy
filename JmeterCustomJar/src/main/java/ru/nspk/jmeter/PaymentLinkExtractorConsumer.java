@@ -44,6 +44,7 @@ public class PaymentLinkExtractorConsumer extends AbstractJavaSamplerClient {
                     PaymentLinkToApi paymentLinkToApi = PaymentLinkToApi.parseFrom(record.value());
                     String requestId = paymentLinkToApi.getPaymentLinkRequestId();
                     if (requestId != null)
+                        System.out.println("New payment request with id " + requestId);
                         paymentPayClient.pay(requestId);
                 } catch (InvalidProtocolBufferException e) {
                     System.out.println("Failed to parse payment link to api");

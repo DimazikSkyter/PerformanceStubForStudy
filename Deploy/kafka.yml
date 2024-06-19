@@ -3,8 +3,8 @@ version: '3.7'
 services:
   zookeeper:
     #macos
-    image: docker.io/bitnami/zookeeper:3.8
-#    image: confluentinc/cp-zookeeper:5.1.2
+#    image: docker.io/bitnami/zookeeper:3.8
+    image: confluentinc/cp-zookeeper:5.1.2
     container_name: zg_core_zookeeper
     restart: always
     volumes:
