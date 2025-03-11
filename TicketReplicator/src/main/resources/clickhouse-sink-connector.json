@@ -1,0 +1,21 @@
+{
+  "name": "clickhouse-sink-connector",
+  "config": {
+    "connector.class": "com.clickhouse.kafka.connect.ClickHouseSinkConnector",
+    "tasks.max": "1",
+    "topics": "your_kafka_topic",
+    "clickhouse.url": "jdbc:clickhouse://localhost:8123/default",
+    "clickhouse.user": "default",
+    "clickhouse.password": "",
+    "clickhouse.table.name": "your_clickhouse_table",
+    "clickhouse.auto.create": "true",
+    "clickhouse.auto.evolve": "true",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "transforms": "TransformField",
+    "transforms.TransformField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.TransformField.renames": "old_field_name:new_field_name",
+    "transforms.TransformField.whitelist": "field1,field2,field3"
+  }
+}

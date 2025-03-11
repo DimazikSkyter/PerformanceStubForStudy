@@ -1,8 +1,9 @@
-package ru.nspk.performance.keyvaluestorage;
+package ru.nspk.performance.keyvaluestorage.hazelcast;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hazelcast.jet.datamodel.Tuple2;
 import lombok.RequiredArgsConstructor;
+import ru.nspk.performance.keyvaluestorage.KeyValueStorage;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;

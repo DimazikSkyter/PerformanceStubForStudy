@@ -1,4 +1,4 @@
-package ru.nspk.performance.keyvaluestorage;
+package ru.nspk.performance.keyvaluestorage.hazelcast;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

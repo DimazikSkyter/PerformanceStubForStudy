@@ -5,7 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.nspk.performance.keyvaluestorage.HazelcastManager;
+import ru.nspk.performance.keyvaluestorage.hazelcast.HazelcastManager;
 import ru.nspk.performance.keyvaluestorage.model.Person;
 
 import java.io.UnsupportedEncodingException;

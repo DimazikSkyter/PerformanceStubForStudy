@@ -13,15 +13,14 @@ import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.nspk.performance.keyvaluestorage.HazelcastKeyValue;
-import ru.nspk.performance.keyvaluestorage.HazelcastManager;
+import ru.nspk.performance.keyvaluestorage.hazelcast.HazelcastKeyValue;
+import ru.nspk.performance.keyvaluestorage.hazelcast.HazelcastManager;
 import ru.nspk.performance.keyvaluestorage.KeyValuePortableFactory;
 import ru.nspk.performance.keyvaluestorage.model.Person;
 import ru.study.api.producer.KafkaProducerImpl;
 import ru.study.api.producer.QueueProducer;
 import ru.study.api.properties.InMemoryProperties;
 import ru.study.api.properties.TheatreProperty;
-import ru.study.api.service.UserServiceImpl;
 
 import java.util.HashMap;
 import java.util.Map;

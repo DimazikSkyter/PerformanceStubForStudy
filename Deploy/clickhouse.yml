@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  clickhouse-server:
+    image: yandex/clickhouse-server:latest
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - C:\\temp\\clickhouse-data:/var/lib/clickhouse
+      - ./db_script/init-clickhouse.sh:/docker-entrypoint-initdb.d/init-db.sh
+
+volumes:
+  clickhouse-data:

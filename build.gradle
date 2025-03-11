@@ -15,9 +15,14 @@ allprojects  {
     if (project.name != "GatlingTest" ) {
         apply plugin: 'java'
 
+        repositories {
+            mavenCentral()
+            maven { url "https://packages.confluent.io/maven/" }
+        }
         dependencies {
             implementation 'com.google.protobuf:protobuf-java:3.14.0'
 
+            implementation 'com.datastax.oss:java-driver-core:4.15.0'
         }
 
         protobuf {
